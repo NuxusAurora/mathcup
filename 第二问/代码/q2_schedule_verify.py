@@ -48,7 +48,7 @@ def read_rows():
     return plans
 
 
-def check(legs):
+def check(legs, *, require_all=True):
     assert len(legs) == 6
     by_car, by_task = defaultdict(list), defaultdict(list)
     road_clearance, sight_clearance = math.inf, math.inf
@@ -79,7 +79,10 @@ def check(legs):
         by_task[task].append((car, route[-1], ready, start))
     assert road_clearance >= RADIUS - 1e-8 and sight_clearance > 1e-8
     angles = []
-    assert set(by_task) == set(range(3)) and set(by_car) == set(range(5))
+    assert set(by_task) == set(range(3))
+    assert set(by_car) <= set(range(len(STARTS)))
+    if require_all:
+        assert set(by_car) == set(range(len(STARTS)))
     for task, group in sorted(by_task.items()):
         (car_a, a, ready_a, start_a), (car_b, b, ready_b, start_b) = group
         assert car_a != car_b and math.dist(a, b) >= 2 * RADIUS
@@ -91,7 +94,8 @@ def check(legs):
     assert all(0 < angle < 180 for angle in angles)
 
     tracks = {}
-    for car, duties in by_car.items():
+    for car in range(len(STARTS)):
+        duties = by_car.get(car, ())
         previous, ready = STARTS[car], 0.0
         track = [(0.0, previous)]
         for route, times in sorted(duties, key=lambda duty: duty[1][0]):

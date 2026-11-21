@@ -150,11 +150,15 @@ def main(argv=None):
         from q2_error_archive import main as archive_main
         return archive_main([a for a in argv if a != "--archive"])
 
+    if "--floor" not in argv:
+        from q2_error_solve import main as solve_main
+        return solve_main(argv)
+
     parser = argparse.ArgumentParser(description=__doc__,
                                      epilog="--archive 可进入旧的论文时间轴查询模式。")
     parser.add_argument("limits", type=parse_limit, nargs="*", metavar="门限_m",
                         help="可指定多个误差门限。省略时进入交互模式。")
-    args = parser.parse_args(argv)
+    args = parser.parse_args([a for a in argv if a != "--floor"])
     print("室内地面测量模拟 | 3 个地面点，4 辆轨道车，每车 3 个停靠站")
     if args.limits:
         for limit in args.limits:
@@ -174,4 +178,4 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

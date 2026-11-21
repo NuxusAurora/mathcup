@@ -150,7 +150,7 @@ def stations(roads):
 
 def pair_compatible(a, b, task):
     u, v = a - TARGETS[task, :2], b - TARGETS[task, :2]
-    return np.linalg.norm(a - b, axis=-1) >= 2 * RADIUS and (
+    return (np.linalg.norm(a - b, axis=-1) >= 2 * RADIUS) & (
         abs(u[..., 0] * v[..., 1] - u[..., 1] * v[..., 0]) > 1e-7
     )
 
