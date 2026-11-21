@@ -100,6 +100,16 @@ def draw():
             d.line(pts+[pts[0]],fill="#495c68",width=ZOOM)
         label(point((x0+x1)/2,(y0+y1)/2,h),f"B{i}",size=19,bold=True)
         label(point((x0+x1)/2,y0,h*0.55),f"{h} m",size=16,color="white")
+    text(1140,719,"最优圆弧示意",23,bold=True)
+    # Reuse the illustration panel from the companion schematic.
+    with Image.open(IMAGE_DIR/"最优站位集合_阴影示意.png") as sketch:
+        panel=sketch.crop((44,140,522,522))
+        im.paste(panel.resize((218*ZOOM,174*ZOOM),Image.Resampling.LANCZOS),
+                 (1140*ZOOM,756*ZOOM))
+    text(1374,778,"斜线带中心线",18,bold=True)
+    text(1374,809,"表示最优圆弧。",18)
+    text(1374,855,"方位与弧长",17)
+    text(1374,881,"仅作示意。",17)
     y=966
     line((65*ZOOM,(y-17)*ZOOM),((WIDTH-65)*ZOOM,(y-17)*ZOOM),"#d6dde0")
     for x,c,s in zip([66,315,643,948,1280],COLORS,
