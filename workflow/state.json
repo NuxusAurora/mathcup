@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "project_title": "2026 数维杯 B题 · 读题与建模",
-  "revision": 35,
-  "updated_at": "2026-11-21T08:34:02+00:00",
+  "revision": 36,
+  "updated_at": "2026-11-21T01:14:34.600146-08:00",
   "nodes": [
     {
       "id": "A",
@@ -500,7 +500,7 @@
           "label": "中文 A017 修订稿 · PDF",
           "path": "综合/文档/B题中文论文审阅稿（A017版）.pdf",
           "preview": {
-            "source_sha256": "87b03a4e9f061770410a0138e941c3d72744ebb5801b961089dec4e55bb18d38",
+            "source_sha256": "6a8a642ba3ce6501f9c2ea2c9465a77beed402fae4d04aa647bdecf2d7dc8153",
             "pages": [
               "综合/图片/预览/中文论文A017版/page-1.webp",
               "综合/图片/预览/中文论文A017版/page-2.webp",
@@ -524,7 +524,7 @@
           "label": "中文 A017 修订稿 · Word",
           "path": "综合/文档/B题中文论文审阅稿（A017版）.docx",
           "preview": {
-            "source_sha256": "7d1978cbefa60481491632a4b204bd4204ea5fce83d8e207e967787643de3a10",
+            "source_sha256": "249dda824da25d34e986ef543e704883434877fed167636583a74df2599e59e2",
             "pages": [
               "综合/图片/预览/中文论文A017版/page-1.webp",
               "综合/图片/预览/中文论文A017版/page-2.webp",
