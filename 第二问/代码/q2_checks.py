@@ -39,4 +39,11 @@ def error_examples():
 
 
 if __name__ == "__main__":
-    save_rows("局部精度算例.csv", error_examples())
+    rows = error_examples()
+    filename = "局部精度算例.csv"
+    save_rows(filename, rows)
+    print("距离1(m)  距离2(m)  交会角(°)  理论RMS(m)  模拟RMS(m)  长轴标准差(m)")
+    for row in rows:
+        print("{r1_m:8d}  {r2_m:8d}  {angle_deg:9d}  {local_rms_m:10.6f}  "
+              "{sample_linear_rms_m:10.6f}  {major_axis_sd_m:13.6f}".format(**row))
+    print(f"局部精度算例：{OUTPUT / filename}")

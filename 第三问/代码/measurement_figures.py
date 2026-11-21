@@ -45,8 +45,10 @@ def probability_plot(result):
            xlabel="累计行驶里程（m）")
     vertical_percent_axis(ax, "达标概率")
     ax.grid(axis="y", color="#DEE4E8", lw=0.6)
-    fig.savefig(IMAGES / "达标概率随累计里程变化.png", dpi=200)
+    path = IMAGES / "达标概率随累计里程变化.png"
+    fig.savefig(path, dpi=200)
     plt.close(fig)
+    return path
 
 
 def contribution_plot(result):
@@ -69,8 +71,10 @@ def contribution_plot(result):
     vertical_percent_axis(ax, "一阶角方差占比")
     ax.grid(axis="y", color="#DEE4E8", lw=0.6)
     ax.legend(loc="upper left", ncols=3, frameon=False)
-    fig.savefig(IMAGES / "不同里程下三类误差的贡献.png", dpi=200)
+    path = IMAGES / "不同里程下三类误差的贡献.png"
+    fig.savefig(path, dpi=200)
     plt.close(fig)
+    return path
 
 
 if __name__ == "__main__":
@@ -79,5 +83,7 @@ if __name__ == "__main__":
                          "font.size": 10, "axes.axisbelow": True,
                          "axes.spines.top": False, "axes.spines.right": False})
     data = json.loads((QUESTION / "文档" / "measurement_results.json").read_text(encoding="utf8"))
-    probability_plot(data["measurement"])
-    contribution_plot(data["measurement"])
+    path = probability_plot(data["measurement"])
+    print(f"已保存：{path}")
+    path = contribution_plot(data["measurement"])
+    print(f"已保存：{path}")

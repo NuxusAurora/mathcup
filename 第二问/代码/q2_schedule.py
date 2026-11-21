@@ -336,12 +336,14 @@ def export(solutions):
                 "指向完成_s": f"{leg.ready:.9f}", "观测开始_s": f"{leg.start:.9f}",
                 "观测结束_复位开始_s": f"{leg.end:.9f}", "复位完成_s": f"{leg.reset:.9f}",
             })
-    with (OUTPUT / "第二问第（2）题逐车时间轴.csv").open(
+    path = OUTPUT / "第二问第（2）题逐车时间轴.csv"
+    with path.open(
         "w", encoding="utf-8-sig", newline=""
     ) as stream:
         writer = csv.DictWriter(stream, fieldnames=list(rows[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
+    return path
 
 
 def main():
@@ -351,9 +353,10 @@ def main():
     plan = joint_search(roads, candidates, objective(baseline))
     optimized = replay(roads, refine(roads, plan))
     solutions = {"优化": optimized, "最近指派": baseline}
-    export(solutions)
+    path = export(solutions)
     for name, legs in solutions.items():
         print(name, f"{objective(legs):.9f} s")
+    print(f"逐车时间轴：{path}")
 
 
 if __name__ == "__main__":

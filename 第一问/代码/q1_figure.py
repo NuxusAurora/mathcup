@@ -140,7 +140,9 @@ def draw(data,area):
     label(868,740,f"最优水平距离   {PITCH_RADIUS:.4f} m",25,True)
     label(868,794,f"对应俯仰角       {PITCH_LIMIT_DEG}°",25,True)
     label(868,860,"相机高 2 m，目标高 45 m",21)
-    canvas.save(IMAGE_DIR/"T1可观测区域.png")
+    path = IMAGE_DIR / "T1可观测区域.png"
+    canvas.save(path)
+    return path
 
 
 if __name__=="__main__":
@@ -149,7 +151,7 @@ if __name__=="__main__":
     area=areas["0.00025"]
     grid=float(np.count_nonzero(data==0)*0.05**2)
     assert abs(areas["0.0005"]-area)<0.001 and abs(grid-area)<1
-    draw(data,area)
-    result=dict(section_areas_m2=areas,grid_005m_area_m2=grid,pitch_radius_m=PITCH_RADIUS,
+    image_path = draw(data,area)
+    result=dict(image_path=str(image_path),section_areas_m2=areas,grid_005m_area_m2=grid,pitch_radius_m=PITCH_RADIUS,
                 share_of_site=area/10000,share_of_vehicle_free_area=area/8302.657082647)
-    print(json.dumps(result,indent=2))
+    print(json.dumps(result,ensure_ascii=False,indent=2))

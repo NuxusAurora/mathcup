@@ -117,8 +117,11 @@ def draw():
                      ["可观测","车体净空不足或越界","视线受建筑遮挡","超过 80° 俯仰上限","建筑占地"]):
         d.rectangle((x*ZOOM,(y+6)*ZOOM,(x+27)*ZOOM,(y+29)*ZOOM),fill=c)
         text(x+39,y,s,21)
-    im.resize((WIDTH,HEIGHT),Image.Resampling.LANCZOS).save(IMAGE_DIR/"T1可观测区域_三维.png")
+    path = IMAGE_DIR / "T1可观测区域_三维.png"
+    im.resize((WIDTH,HEIGHT),Image.Resampling.LANCZOS).save(path)
+    return path
 
 
 if __name__=="__main__":
-    draw()
+    path = draw()
+    print(f"T1 可观测区域三维图（{WIDTH} × {HEIGHT} 像素）：{path}")

@@ -1,4 +1,5 @@
 """Replay the fixed timetable and write the scores for the question 4 scenarios."""
+from collections import defaultdict
 import csv
 from itertools import product
 from pathlib import Path
@@ -69,6 +70,12 @@ def main():
                          "中断时长_s", "恢复时刻_s", "k", "N", "完成率", "最晚开始_s"))
         writer.writerows(rows)
     print(f"{len(rows)} scenarios")
+    rates = defaultdict(list)
+    for label, *_, completed, total, rate_text, last_start in rows:
+        rates[label].append(completed / total)
+    for label, values in sorted(rates.items()):
+        print(f"{label}（{len(values)} 个场景） 平均完成率 {sum(values) / len(values):.2%}")
+    print(f"逐场景成绩：{RESULT}")
 
 
 if __name__ == "__main__":

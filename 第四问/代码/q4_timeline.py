@@ -205,3 +205,11 @@ def first_change(reference, planned):
                     break
             i, j = i + (a[i].end <= b[j].end), j + (b[j].end <= a[i].end)
     return None if math.isinf(answer) else answer
+
+
+if __name__ == "__main__":
+    tracks = fixed_tracks(read_duties(), fault=None)
+    starts = observation_starts(tracks)
+    print(f"基准时间轴：{len(tracks)} 辆车，{len(starts)} 个观测任务")
+    for task, start in sorted(starts.items()):
+        print(f"{task} 观测开始：{start:.9f} s")

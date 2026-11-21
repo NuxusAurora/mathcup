@@ -109,5 +109,12 @@ def rule_checks():
 
 if __name__ == "__main__":
     result = dict(measurement=measurement(), checks=rule_checks())
-    (Path(__file__).resolve().parents[1] / "文档" / "measurement_results.json").write_text(
+    path = Path(__file__).resolve().parents[1] / "文档" / "measurement_results.json"
+    path.write_text(
         json.dumps(result, ensure_ascii=False, indent=2)+"\n", encoding="utf8")
+    data = result["measurement"]
+    at_limit = next(row for row in data["coverage"] if row["s_m"] == data["s_m"])
+    print(f"95% 达标里程：{data['s_m']:.4f} m")
+    print(f"理论达标率：{at_limit['quadrature']:.3%}")
+    print(f"模拟达标率：{at_limit['simulation']:.3%}（{data['n']:,} 次）")
+    print(f"结果文件：{path}")

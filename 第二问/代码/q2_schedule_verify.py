@@ -155,8 +155,10 @@ def plot(plans):
     panels[-1].set_xlabel("告警发布后的时间（s）", fontproperties=font, labelpad=6)
     figure.legend([Patch(color=c) for c in colors], labels, ncol=5, frameon=False,
                   loc="lower center", prop=font, bbox_to_anchor=(0.5, 0.017))
-    figure.savefig(OUTPUT.parent / "图片" / "第二问第（2）题时间轴.png", dpi=155)
+    path = OUTPUT.parent / "图片" / "第二问第（2）题时间轴.png"
+    figure.savefig(path, dpi=155)
     plt.close(figure)
+    return path
 
 
 if __name__ == "__main__":
@@ -166,4 +168,5 @@ if __name__ == "__main__":
         road, sight, distance, angles = check(legs)
         print(f"{name}: road={road:.8f} m, sight={sight:.8f} m, vehicle={distance:.8f} m, "
               f"intersection degrees={[round(angle, 4) for angle in angles]}")
-    plot(plans)
+    path = plot(plans)
+    print(f"时间轴图片：{path}")

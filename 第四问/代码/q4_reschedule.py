@@ -272,6 +272,8 @@ def main():
             generate(scores, tracks, args.sample)
         for name in (SCORES, TRACKS):
             (staged / name).replace(args.output / name)
+    for name in (SCORES, TRACKS):
+        print(f"已保存：{(args.output / name).resolve()}")
 
 
 if __name__ == "__main__":
