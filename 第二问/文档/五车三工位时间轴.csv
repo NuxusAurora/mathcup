@@ -1,0 +1,13 @@
+﻿order,task,resource,depart_s,arrive_s,ready_s,wait_s,start_s,end_s,reset_done_s
+NEAR,A,V1,0,0,1,1,2,7,8
+NEAR,A,V2,0,1,2,0,2,7,8
+NEAR,B,V3,0,0,2,4,6,11,13
+NEAR,C,V3,13,17,18,0,18,23,24
+NEAR,B,V4,0,4,6,0,6,11,13
+NEAR,C,V5,0,1,2,16,18,23,24
+OPT,A,V1,0,0,1,1,2,7,8
+OPT,A,V2,0,1,2,0,2,7,8
+OPT,B,V3,0,0,2,12,14,19,21
+OPT,C,V4,0,0,1,1,2,7,8
+OPT,B,V4,8,12,14,0,14,19,21
+OPT,C,V5,0,1,2,0,2,7,8
