@@ -1,4 +1,4 @@
-"""Reproduce the two abstract examples in the question 2 report (Python + NumPy)."""
+"""Reproduce the local accuracy examples for question 2(1) (Python + NumPy)."""
 import csv
 from math import cos, radians, sin, sqrt
 from pathlib import Path
@@ -38,35 +38,5 @@ def error_examples():
     return rows
 
 
-def timing_examples():
-    first_drive = {"A":1, "B":3}
-    turn = {"A":1, "B":2}
-    partner_drive = {"A":9, "B":1}
-    partner_turn = {"A":3, "B":1}
-    rows = []
-    for order in ("AB", "BA"):
-        release = 0
-        starts = []
-        for index, job in enumerate(order):
-            drive = first_drive[job] if index==0 else 4
-            arrival = release + drive
-            ready = arrival + turn[job]
-            other_ready = partner_drive[job] + partner_turn[job]
-            start = max(ready, other_ready)
-            end = start + 5
-            resources = [("R",release,arrival,ready,turn[job]),
-                         ("P_"+job,0,partner_drive[job],other_ready,partner_turn[job])]
-            for resource, depart, arrive, aimed, reset in resources:
-                rows.append({"order":order, "task":job, "resource":resource,
-                             "depart_s":depart, "arrive_s":arrive, "ready_s":aimed,
-                             "wait_s":start-aimed, "start_s":start, "end_s":end,
-                             "reset_done_s":end+reset})
-            release = end + turn[job]
-            starts.append(start)
-        assert starts == ([12,24] if order=="AB" else [5,17])
-    return rows
-
-
 if __name__ == "__main__":
     save_rows("局部精度算例.csv", error_examples())
-    save_rows("同步时序算例.csv", timing_examples())

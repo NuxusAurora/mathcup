@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "project_title": "2026 数维杯 B题 · 读题与建模",
-  "revision": 23,
-  "updated_at": "2026-11-21T05:38:41.086Z",
+  "revision": 24,
+  "updated_at": "2026-11-21T05:40:57.973Z",
   "nodes": [
     {
       "id": "A",
@@ -101,10 +101,6 @@
       ],
       "outputs": [
         {
-          "label": "第二问 · 就绪时刻核算脚本",
-          "path": "第二问/代码/compare_ready_times.py"
-        },
-        {
           "label": "第二问（1）· 定位精度实验",
           "path": "第二问/文档/第二问定位精度实验.md",
           "preview": {
@@ -119,7 +115,7 @@
           "path": "第二问/文档/局部精度算例.csv"
         },
         {
-          "label": "第二问 · 复现脚本",
+          "label": "第二问（1）· 局部精度复现脚本",
           "path": "第二问/代码/q2_checks.py"
         },
         {
@@ -238,10 +234,6 @@
       ],
       "outputs": [
         {
-          "label": "第二问 · 就绪时刻核算脚本",
-          "path": "第二问/代码/compare_ready_times.py"
-        },
-        {
           "label": "第二问（1）· 定位精度实验",
           "path": "第二问/文档/第二问定位精度实验.md",
           "preview": {
@@ -256,7 +248,7 @@
           "path": "第二问/文档/局部精度算例.csv"
         },
         {
-          "label": "第二问 · 复现脚本",
+          "label": "第二问（1）· 局部精度复现脚本",
           "path": "第二问/代码/q2_checks.py"
         },
         {
