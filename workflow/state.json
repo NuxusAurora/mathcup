@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "project_title": "2026 数维杯 B题 · 读题与建模",
-  "revision": 28,
-  "updated_at": "2026-11-21T06:35:38+00:00",
+  "revision": 30,
+  "updated_at": "2026-11-21T06:44:49+00:00",
   "nodes": [
     {
       "id": "A",
@@ -489,19 +489,58 @@
       "id": "E",
       "kind": "stage",
       "title": "论文与排版",
-      "status": "pending",
-      "summary": "图表、正文、引用、编译与逐页检查",
+      "status": "running",
+      "summary": "英文审阅稿已排版并逐页渲染。正式队号、队员独立审订及历次 AI 使用记录待确认。",
       "depends_on": [
         "D"
       ],
       "inputs": [],
-      "outputs": [],
+      "outputs": [
+        {
+          "label": "Word 英文审阅稿",
+          "path": "综合/文档/B题英文论文审阅稿.docx",
+          "preview": {
+            "source_sha256": "0eac81229776d0430bc9d2bfe091843e31bd8b0ae957177b3bd28b9b6d6c4f29",
+            "pages": [
+              "综合/图片/预览/英文论文审阅稿/page-1.png",
+              "综合/图片/预览/英文论文审阅稿/page-2.png",
+              "综合/图片/预览/英文论文审阅稿/page-3.png",
+              "综合/图片/预览/英文论文审阅稿/page-4.png",
+              "综合/图片/预览/英文论文审阅稿/page-5.png",
+              "综合/图片/预览/英文论文审阅稿/page-6.png",
+              "综合/图片/预览/英文论文审阅稿/page-7.png",
+              "综合/图片/预览/英文论文审阅稿/page-8.png",
+              "综合/图片/预览/英文论文审阅稿/page-9.png",
+              "综合/图片/预览/英文论文审阅稿/page-10.png"
+            ]
+          }
+        },
+        {
+          "label": "PDF 英文审阅稿",
+          "path": "综合/文档/B题英文论文审阅稿.pdf",
+          "preview": {
+            "source_sha256": "1023e84231edc68c0918ba97b8345edc32a3815d562c61e29037d920316a3388",
+            "pages": [
+              "综合/图片/预览/英文论文审阅稿/page-1.png",
+              "综合/图片/预览/英文论文审阅稿/page-2.png",
+              "综合/图片/预览/英文论文审阅稿/page-3.png",
+              "综合/图片/预览/英文论文审阅稿/page-4.png",
+              "综合/图片/预览/英文论文审阅稿/page-5.png",
+              "综合/图片/预览/英文论文审阅稿/page-6.png",
+              "综合/图片/预览/英文论文审阅稿/page-7.png",
+              "综合/图片/预览/英文论文审阅稿/page-8.png",
+              "综合/图片/预览/英文论文审阅稿/page-9.png",
+              "综合/图片/预览/英文论文审阅稿/page-10.png"
+            ]
+          }
+        }
+      ],
       "blockers": [],
       "checks": [
         {
           "label": "正式文件与结果一致，实际排版已检查",
-          "status": "not_run",
-          "detail": ""
+          "status": "passed",
+          "detail": "两份文件同源，分页、图表、公式与汇总值已核对。"
         }
       ]
     },
