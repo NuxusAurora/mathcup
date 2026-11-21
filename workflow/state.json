@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "project_title": "2026 数维杯 B题 · 读题与建模",
+  "revision": 3,
+  "updated_at": "2026-11-21T01:49:33+00:00",
+  "nodes": [
+    {
+      "id": "A",
+      "kind": "stage",
+      "title": "读题与附件",
+      "status": "passed",
+      "summary": "四问已拆分，中英文原题的恢复时刻歧义已核对。",
+      "depends_on": [],
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "B题建模稿",
+          "path": "B题建模稿.md",
+          "preview": {
+            "source_sha256": "398ccbc4ef11713e9a5c5f936a41cafcdbe262c28b4ba96eed5b4ff230f7a872",
+            "pages": [
+              "previews/formulas/part-1.png",
+              "previews/formulas/part-2.png",
+              "previews/formulas/part-3.png",
+              "previews/formulas/part-4.png",
+              "previews/formulas/part-5.png"
+            ]
+          }
+        }
+      ],
+      "blockers": [],
+      "checks": [
+        {
+          "label": "所有问题及关键条件有来源，缺口明确",
+          "status": "passed",
+          "detail": "四问已拆分，中英文原题的恢复时刻歧义已核对。"
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "kind": "stage",
+      "title": "建模与设计",
+      "status": "passed",
+      "summary": "四问模型及实验设计已整理。第四问主分析采用解释 B，中断持续 5～30 秒，于第 10～35 秒恢复。",
+      "depends_on": [
+        "A"
+      ],
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "B题建模稿",
+          "path": "B题建模稿.md",
+          "preview": {
+            "source_sha256": "398ccbc4ef11713e9a5c5f936a41cafcdbe262c28b4ba96eed5b4ff230f7a872",
+            "pages": [
+              "previews/formulas/part-1.png",
+              "previews/formulas/part-2.png",
+              "previews/formulas/part-3.png",
+              "previews/formulas/part-4.png",
+              "previews/formulas/part-5.png"
+            ]
+          }
+        }
+      ],
+      "blockers": [],
+      "checks": [
+        {
+          "label": "模型与题意对应，参数和检验方案明确",
+          "status": "passed",
+          "detail": "四问数学模型、假设、基线和验证设计已整理。"
+        }
+      ]
+    },
+    {
+      "id": "C",
+      "kind": "stage",
+      "title": "实现与求解",
+      "status": "pending",
+      "summary": "真实数据处理、代码执行与结构化结果",
+      "depends_on": [
+        "B"
+      ],
+      "inputs": [],
+      "outputs": [],
+      "blockers": [],
+      "checks": [
+        {
+          "label": "实际运行完成，候选与失败有明确状态",
+          "status": "not_run",
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "kind": "stage",
+      "title": "结果验证",
+      "status": "pending",
+      "summary": "独立复算、对照、误差与稳健性",
+      "depends_on": [
+        "C"
+      ],
+      "inputs": [],
+      "outputs": [],
+      "blockers": [],
+      "checks": [
+        {
+          "label": "正式结果可追溯，结论强度符合证据",
+          "status": "not_run",
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "id": "E",
+      "kind": "stage",
+      "title": "论文与排版",
+      "status": "pending",
+      "summary": "图表、正文、引用、编译与逐页检查",
+      "depends_on": [
+        "D"
+      ],
+      "inputs": [],
+      "outputs": [],
+      "blockers": [],
+      "checks": [
+        {
+          "label": "正式文件与结果一致，实际排版已检查",
+          "status": "not_run",
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "id": "F",
+      "kind": "stage",
+      "title": "提交验收",
+      "status": "pending",
+      "summary": "规则、匿名、声明、附件与复现",
+      "depends_on": [
+        "E"
+      ],
+      "inputs": [],
+      "outputs": [],
+      "blockers": [],
+      "checks": [
+        {
+          "label": "最终文件完成适用检查，未测项明确",
+          "status": "not_run",
+          "detail": ""
+        }
+      ]
+    }
+  ],
+  "requests": []
+}
