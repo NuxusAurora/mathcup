@@ -1,0 +1,87 @@
+
+% ════════════════════════════════════════════
+% 模型求解（5.2.4.模型求解.tex，三级子块）—— 写作提示词见本文件末尾【本章节写作提示词】。
+% ════════════════════════════════════════════
+\subsubsection{模型求解}
+
+基于上述模型，本节先以 1 m 网格枚举 T2 可观测站对进行交叉验证，再取解析最优构型（解析构造 + 可行校验），与代码实现一致；并对并发告警进行车辆指派与时序仿真穷举。求解环境为 Python 3 与 NumPy，核心结果如表\ref{tab:结果2}所示。
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.30\textwidth}>{\centering\arraybackslash}p{0.66\textwidth}}
+  \caption{问题二 T2 最优站对求解结果}
+  \label{tab:结果2} \\
+  \toprule
+  指标 & 结果 \\
+  \midrule
+  \endfirsthead
+  \caption{问题二 T2 最优站对求解结果（续）} \\
+  \toprule
+  指标 & 结果 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  最优站 S1（西） & (5.210, 72.500) m，方位角 0 度 \\
+  最优站 S2（北） & (11.029, 78.319) m，方位角 270 度 \\
+  基线长度 $B$ & 8.229 m \\
+  交会角 $\gamma$ & 90.0 度 \\
+  精度指标 $P$ & 0.12152 \\
+  定位误差 $\sigma_p$ & 14.362 cm \\
+  车辆指派 & V3 至西站、V5 至北站 \\
+  最大行驶时间 & 13.88 s \\
+\end{longtable}
+
+作为交叉验证，1 m 网格枚举所得 $P\approx 0.1167$、$\sigma_p\approx 15.0$ cm，与解析最优差 4.0\%，见表\ref{tab:error}。
+
+如图\ref{fig:2_2}所示，两站方位线在 T2 处以 90 度交会，基线长度 8.229 m，几何构型达到理论最优。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.62\textwidth]{../求解/问题二/图片/图2-2\_两站交会定位几何示意.png}
+  \caption{两站交会定位几何示意}
+  \label{fig:2_2}
+\end{figure}
+
+如图\ref{fig:2_6}所示，最优站对落在 T2 可观测区域的西侧与北侧边缘，两站均满足三项约束且交会角为 90 度，验证了站对选取的正确性。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.48\textwidth]{../求解/问题二/图片/图2-6\_最优站对几何标注.png}
+  \caption{T2 最优站对几何标注}
+  \label{fig:2_6}
+\end{figure}
+
+并发调度结果如表\ref{tab:结果3}所示，最优方案的最大观测开始时间为 12.063 s，复用车辆 V5 依次服务 T3 与 T1，其余车辆各服务一个告警；由于目标高度较高、车辆初始位置即满足多数可观测条件，最优方案呈现“原地观测”特征。
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.13\textwidth}>{\centering\arraybackslash}p{0.15\textwidth}>{\centering\arraybackslash}p{0.18\textwidth}>{\centering\arraybackslash}p{0.24\textwidth}>{\centering\arraybackslash}p{0.16\textwidth}}
+  \caption{问题二并发调度结果}
+  \label{tab:结果3} \\
+  \toprule
+  告警 & 观测开始(s) & 服务车辆 & 观测站 & 定位误差 $\sigma_p$ (cm) \\
+  \midrule
+  \endfirsthead
+  \caption{问题二并发调度结果（续）} \\
+  \toprule
+  告警 & 观测开始(s) & 服务车辆 & 观测站 & 定位误差 $\sigma_p$ (cm) \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  T1 & 12.063 & V2、V5 & (88,10)、(50,93) & 159.3 \\
+  T2 & 6.963 & V3、V4 & (14,86)、(88,71) & 139.2 \\
+  T3 & 2.766 & V1、V5 & (15,14)、(50,93) & 162.1 \\
+\end{longtable}
+
+如图\ref{fig:2_12}所示，最优调度时间轴显示车辆 V5 先观测 T3 再观测 T1，其余车辆并行服务各自告警，观测窗口清晰无冲突。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.50\textwidth]{../求解/问题二/图片/图2-12\_最优调度甘特时间轴.png}
+  \caption{最优调度甘特时间轴}
+  \label{fig:2_12}
+\end{figure}
+
+由表\ref{tab:结果3}可知，最近指派启发式的最大观测开始时间为 12.561 s，略高于最优方案的 12.063 s。
+
+需要指出的是，makespan 目标并不约束定位精度，故调度解中各告警的 $\sigma_p$（159.3、139.2、162.1 cm）约为 T2 最优站对 14.362 cm 的十倍，这是以精度换取调度效率的代价；若对站距施加 40 m 精度上限，最大观测开始时间由 12.063 s 升至 20.311 s，即为此权衡的量化体现。
+
+综合以上结果，问题二方案在满足可观测性与交会角约束的前提下实现了最小最大观测开始时间。

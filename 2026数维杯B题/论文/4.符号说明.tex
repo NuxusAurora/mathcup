@@ -1,0 +1,39 @@
+
+% ════════════════════════════════════════════
+% 符号说明（04.符号说明.tex）—— 写作提示词见本文件末尾【本章节写作提示词】。
+% ════════════════════════════════════════════
+\section{符号说明}
+
+本文使用的主要符号及其含义如表\ref{tab:符号说明}所示。
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.18\textwidth}>{\centering\arraybackslash}p{0.78\textwidth}}
+  \caption{符号说明}
+  \label{tab:符号说明} \\
+  \toprule
+  符号 & 说明 \\
+  \midrule
+  \endfirsthead
+  \caption{符号说明（续）} \\
+  \toprule
+  符号 & 说明 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  $(x_T,y_T,H)$ & 无人机目标的水平坐标与高度（单位：m） \\
+  $(\theta,R)$ & 告警给出的方位角（度）与水平距离（m） \\
+  $r$ & 相机到目标的水平距离（m） \\
+  $\varphi$ & 视线俯仰角（度） \\
+  $Q$ & 观测质量度量，$Q=1/r$（1/m） \\
+  $\gamma$ & 两方位线交会角（度） \\
+  $B$ & 两观测站之间的基线长度（m） \\
+  $\sigma$ & 方位角测量误差标准差（度） \\
+  $\sigma_p$ & 交会定位位置误差均方根（m） \\
+  $P$ & 交会定位精度指标（1/m） \\
+  $\Delta\psi$ & 指令方位角与真实方位角之差（度） \\
+  $\sigma_{\mathrm{pos}}(s)$ & 行驶 $s$ 米后的定位标准差（m） \\
+  $s_{\max}$ & 满足精度要求的最大允许行驶距离（m） \\
+  $\eta$ & 扰动场景下的告警完成率 \\
+  $t_{\mathrm{last}}$ & 最晚观测开始时间（s） \\
+  $t_{\mathrm{rec}}$ & 通信恢复时刻（s） \\
+\end{longtable}

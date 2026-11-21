@@ -1,0 +1,73 @@
+
+% ════════════════════════════════════════════
+% 模型建立（5.2.3.模型建立.tex，三级子块）—— 写作提示词见本文件末尾【本章节写作提示词】。
+% ════════════════════════════════════════════
+\subsubsection{模型建立}
+
+针对问题二，本节将建立两站交会定位精度模型与并发告警车辆调度模型。具体过程如下。
+
+\textbf{步骤1：交会定位误差传播模型}
+
+设两观测站 $S_1$、$S_2$ 到目标水平投影的距离分别为 $r_1$、$r_2$，方位角测量误差 $\varepsilon_1,\varepsilon_2$ 相互独立且服从 $N(0,\sigma^2)$。在目标处建立局部坐标，方位误差 $\varepsilon_i$ 使第 $i$ 条方位线发生横向平移 $r_i\varepsilon_i$，两条平移后的方位线交点为定位结果。设两方位线交会角为 $\gamma$，经线性化推导可得位置误差向量沿两方位线法向的分量满足：
+\begin{equation}
+    \bm{d}\cdot \bm{v}_1 = r_1\varepsilon_1, \qquad \bm{d}\cdot \bm{v}_2 = r_2\varepsilon_2,
+\end{equation}
+其中，$\bm{v}_i$ 为第 $i$ 条方位线的单位法向量，且 $\bm{v}_1\cdot\bm{v}_2=\cos\gamma$。解得位置误差为：
+\begin{equation}
+    \bm{d}=\frac{r_2\varepsilon_2-r_1\varepsilon_1\cos\gamma}{\sin\gamma}\,\bm{u}_1 + r_1\varepsilon_1\,\bm{v}_1 .
+\end{equation}
+对模长取期望，并利用 $E[\varepsilon_i^2]=\sigma^2$、$E[\varepsilon_1\varepsilon_2]=0$，得定位误差均方根为：
+\begin{equation}
+    \sigma_p=\sqrt{E[\lVert\bm{d}\rVert^2]}=\sigma\,\frac{\sqrt{r_1^2+r_2^2}}{\lvert\sin\gamma\rvert} .
+\end{equation}
+该式表明：距离越近、交会角越接近 90 度，定位越精确；交会角趋于 0 度或 180 度时 $\lvert\sin\gamma\rvert\to 0$，误差发散。这与多站测向交叉定位精度分析的一般结论一致\cite{jiang2011shuxue,wang2007cexiang,liu2008cexiang}。
+
+\textbf{步骤2：精度指标与退化讨论}
+
+由式(12)定义交会定位精度指标为：
+\begin{equation}
+    P=\frac{\lvert\sin\gamma\rvert}{\sqrt{r_1^2+r_2^2}},
+\end{equation}
+$P$ 越大定位越精确。当 $\gamma\to 0^\circ$ 或 $180^\circ$ 时，两方位线近乎平行，微小误差即可导致交点大幅偏移，模型退化；当站点位于可观测区域边界时，俯仰角处于 80 度临界或视线恰好擦过建筑，轻微扰动即可能破坏可观测性。处理策略为：对交会角施加下限 $\gamma\in[40^\circ,140^\circ]$，并让站点与边界保持净距余量。
+
+\textbf{步骤3：最优站对优化模型}
+
+在车辆行驶时间不超过 30 s 的约束下，选择 2 台车并确定 T2 的观测站对，使精度指标最大：
+\begin{equation}
+    \max_{S_1,S_2,v_a,v_b} \; P \quad \text{s.t.} \quad
+    \begin{cases}
+    S_1,S_2 \text{ 满足三项可观测约束},\\
+    \dfrac{\lVert S_1-V_a\rVert}{v_s}\le 30,\; \dfrac{\lVert S_2-V_b\rVert}{v_s}\le 30,\\
+    v_a\neq v_b .
+    \end{cases}
+\end{equation}
+其中，$v_s=3$ m/s 为行驶速度，$V_a$、$V_b$ 为两车初始位置。
+
+下面证明该最优站对无需连续搜索即可全局最优。设俯仰约束给出的最小水平距离为 $r_{\min}$，即两站均满足 $r_1,r_2\ge r_{\min}$；又 $\lvert\sin\gamma\rvert\le 1$ 恒成立。由误差传播公式 $\sigma_p=\sigma\,\sqrt{r_1^2+r_2^2}/\lvert\sin\gamma\rvert$ 可得下界：
+\begin{equation}
+    \sigma_p=\sigma\,\frac{\sqrt{r_1^2+r_2^2}}{\lvert\sin\gamma\rvert}\ge \sigma\sqrt{2}\,r_{\min},
+\end{equation}
+等号当且仅当 $r_1=r_2=r_{\min}$ 且 $\lvert\sin\gamma\rvert=1$（即 $\gamma=90^\circ$）时成立，对应“正西 + 正北、距离取 $r_{\min}$”的构型。因此，只需校验该构型是否满足可观测与行驶时间约束即可判定全局最优，无需对站对做连续搜索。
+
+\textbf{步骤4：并发告警车辆调度模型}
+
+对并发告警 $i\in\{1,2,3\}$，设车辆 $v$ 沿任务序列行驶，其到第 $i$ 告警观测站的到站时刻与云台转动时长分别为：
+\begin{equation}
+    t_{\text{arr}}(v,i)=t_{\text{free}}(v)+\frac{d(v,S_{v,i})}{v_s}, \qquad
+    t_{\text{rot}}(v,i)=\frac{\max(\Delta\alpha_{v,i},\,\lvert\varphi_{v,i}\rvert)}{\omega},
+\end{equation}
+其中，$d$ 为行驶距离，$\omega=30$ 度/s 为云台角速度。车辆对告警 $i$ 的就绪时刻为：
+\begin{equation}
+    t_{\text{ready}}(v,i)=t_{\text{arr}}(v,i)+t_{\text{rot}}(v,i).
+\end{equation}
+告警 $i$ 的观测开始时刻为两车就绪时刻的较大者：
+\begin{equation}
+    t_{\text{start}}(i)=\max\big(t_{\text{ready}}(v_a,i),\,t_{\text{ready}}(v_b,i)\big).
+\end{equation}
+目标是最小化最大观测开始时间：
+\begin{equation}
+    \min \; \max_i t_{\text{start}}(i).
+\end{equation}
+每辆车完成观测后需以 $t_{\text{rot}}$ 复位云台，再前往下一观测站，其时间轴据此递推。
+
+综上所述，本节完成了交会定位精度模型与并发调度模型的建立，接下来将基于此进行求解。

@@ -1,0 +1,61 @@
+
+% ════════════════════════════════════════════
+% 模型检验与分析（06.模型检验.tex）—— 写作提示词见本文件末尾【本章节写作提示词】。
+% ════════════════════════════════════════════
+\section{模型检验与分析}
+
+为验证本文构建的模型的有效性和稳健性，进行以下检验。
+
+\subsection{误差分析}
+
+本文通过解析解与数值解的相互印证、蒙特卡洛仿真与理论概率的对照来检验模型正确性，结果如表\ref{tab:error}所示。
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.28\textwidth}>{\centering\arraybackslash}p{0.22\textwidth}>{\centering\arraybackslash}p{0.22\textwidth}>{\centering\arraybackslash}p{0.16\textwidth}}
+  \caption{模型误差分析结果}
+  \label{tab:error} \\
+  \toprule
+  指标 & 理论值 & 数值/仿真值 & 相对误差 \\
+  \midrule
+  \endfirsthead
+  \caption{模型误差分析结果（续）} \\
+  \toprule
+  指标 & 理论值 & 数值/仿真值 & 相对误差 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  问题一最优距离 $r^*$ (m) & 7.582 & 7.585 & 0.04\% \\
+  问题二精度指标 $P$ & 0.12152 & 0.11667 & 4.0\% \\
+  问题二定位误差 $\sigma_p$ (cm) & 14.362 & 15.0 & 4.4\% \\
+  问题三概率 $P(\lvert\Delta\psi\rvert\le5^\circ)$ & 0.9500 & 0.9498 & 0.02\% \\
+\end{longtable}
+
+如表\ref{tab:error}所示，问题一与问题三的理论值与数值/仿真值高度吻合，相对误差在 0.1\% 量级，验证了可观测性判定与误差传播模型的正确性；问题二的精度指标理论值与网格枚举值存在约 4\% 差异，其来源是网格离散使最优站无法精确落在解析最优位置，属离散误差而非模型误差，加密网格即可收敛。
+
+\subsection{灵敏度分析}
+
+通过改变关键参数观察输出稳定性，结果如表\ref{tab:sensitivity}所示。
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.30\textwidth}>{\centering\arraybackslash}p{0.34\textwidth}>{\centering\arraybackslash}p{0.28\textwidth}}
+  \caption{灵敏度分析结果}
+  \label{tab:sensitivity} \\
+  \toprule
+  参数变化 & 输出变化 & 灵敏度评估 \\
+  \midrule
+  \endfirsthead
+  \caption{灵敏度分析结果（续）} \\
+  \toprule
+  参数变化 & 输出变化 & 灵敏度评估 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  俯仰角上限 30→60→80 度 & 可观测区面积 937→4603→5697 平方米 & 高度敏感 \\
+  交会角下限 20→60 度 & 最优最大观测开始时间波动约 3 s & 中等敏感 \\
+  站距上限 15→无穷 m & 最优最大观测开始时间 24→12 s & 高度敏感 \\
+  精度要求 2→10 度 & 最大行驶距离 0→90 m 以上 & 高度敏感 \\
+  目标距离 20→100 m & 最大行驶距离 130→30 m 递减 & 高度敏感 \\
+  通信恢复 8→25 s & 完成率恒为 1.00，重调度时间轴接近基线 & 低敏感 \\
+\end{longtable}
+
+如表\ref{tab:sensitivity}所示，可观测区面积对俯仰角上限、最优调度对站距上限、最大行驶距离对精度要求与目标距离均较敏感，说明这些参数是决定模型输出的关键量；其中俯仰角上限对应的可观测区面积按代码同一判据（0.5 m 网格）复算，30°、60°、80° 下分别为 937、4603、5697 平方米。通信恢复时刻对完成率不敏感，这是因为已下达的调度不受通信中断影响，通信恢复仅影响新增指令的下达时间。上述灵敏度分析表明，本文模型在各关键参数下的变化趋势符合物理直觉，结论稳健可靠。

@@ -1,0 +1,60 @@
+
+% ════════════════════════════════════════════
+% 模型求解（5.3.4.模型求解.tex，三级子块）—— 写作提示词见本文件末尾【本章节写作提示词】。
+% ════════════════════════════════════════════
+\subsubsection{模型求解}
+
+基于上述模型，本节以 20 万次蒙特卡洛对解析结果进行验证。求解环境为 Python 3 与 SciPy，核心结果如表\ref{tab:结果4}所示。
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.30\textwidth}>{\centering\arraybackslash}p{0.66\textwidth}}
+  \caption{问题三误差传播求解结果}
+  \label{tab:结果4} \\
+  \toprule
+  指标 & 结果 \\
+  \midrule
+  \endfirsthead
+  \caption{问题三误差传播求解结果（续）} \\
+  \toprule
+  指标 & 结果 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  换算系数 $K_\psi$ & 1.432 度/m \\
+  定位标准差上限 $\sigma_{\mathrm{pos}}$ & 1.638 m \\
+  最大允许行驶距离 $s_{\max}$ & 66.92 m \\
+  仅定位误差时 $s_{\max}$ & 74.05 m \\
+  $s=80$ 参数约束 & $a+80b\le 1.638$ m \\
+  定位误差方差占比 & 84.6\% \\
+  零位偏差方差占比 & 9.8\% \\
+  控制误差方差占比 & 5.5\% \\
+\end{longtable}
+
+如图\ref{fig:3_3}所示，总方位偏差标准差随行驶距离单调上升，在 66.92 m 处达到 95\% 概率阈值的 2.551 度，确定最大允许行驶距离。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.66\textwidth]{../求解/问题三/图片/图3-3\_方位偏差标准差随行驶距离.png}
+  \caption{方位偏差标准差随行驶距离变化}
+  \label{fig:3_3}
+\end{figure}
+
+如图\ref{fig:3_5}所示，蒙特卡洛估计与解析概率曲线几乎重合，在 $s=66.92$ m 处蒙特卡洛概率为 0.9498，与理论值 0.9500 吻合，验证了小角度近似与正态合成假设的适用性。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.66\textwidth]{../求解/问题三/图片/图3-5\_概率随行驶距离.png}
+  \caption{概率满足度随行驶距离变化的解析与蒙特卡洛对比}
+  \label{fig:3_5}
+\end{figure}
+
+如图\ref{fig:3_9}所示，三类误差源的方差占比随行驶距离变化：定位误差占比随距离增大而上升，在 $s_{\max}$ 处约为 84.6\%，说明定位误差是主导误差源。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.66\textwidth]{../求解/问题三/图片/图3-9\_三误差源方差占比堆叠.png}
+  \caption{三类误差源方差占比随行驶距离的堆叠}
+  \label{fig:3_9}
+\end{figure}
+
+由表\ref{tab:结果4}可知，最大允许行驶距离为 66.92 m，误差模型参数须满足 $a+80b\le 1.638$ m 的可行域约束；从图\ref{fig:3_9}可以看出，定位误差贡献随距离显著增长，零位偏差与控制误差贡献相对稳定。综合以上结果，问题三给出了满足精度要求的行驶距离上限与误差参数约束，为车辆部署提供了量化依据。

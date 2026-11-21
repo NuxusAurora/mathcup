@@ -1,0 +1,45 @@
+
+% ════════════════════════════════════════════
+% 模型建立（5.4.3.模型建立.tex，三级子块）—— 写作提示词见本文件末尾【本章节写作提示词】。
+% ════════════════════════════════════════════
+\subsubsection{模型建立}
+
+针对问题四，本节将建立扰动建模、重调度优化与方案评价模型。具体过程如下。
+
+\textbf{步骤1：扰动建模与状态快照}
+
+设触发重调度的时刻为 $t_{\mathrm{trig}}$，通信中断时 $t_{\mathrm{trig}}=t_{\mathrm{rec}}$，否则 $t_{\mathrm{trig}}=5$ s。对每台未故障车辆 $v$，沿其任务序列逐段判断 $t_{\mathrm{trig}}$ 时刻所处状态，得到其位置 $\bm{P}_v$ 与最早可用时刻 $t_{\mathrm{avail}}(v)$。若车辆处于行驶途中，其位置按线性插值：
+\begin{equation}
+    \bm{P}_v=\bm{P}_{\mathrm{prev}}+\frac{t_{\mathrm{trig}}-t_{\mathrm{depart}}}{t_{\mathrm{arrive}}-t_{\mathrm{depart}}}\big(\bm{S}_v-\bm{P}_{\mathrm{prev}}\big),
+\end{equation}
+其中，$\bm{P}_{\mathrm{prev}}$ 为上一站点，$\bm{S}_v$ 为当前目的地。已开始观测的告警不可重排，其车辆可用时刻为观测结束加复位完成时刻。
+
+\textbf{步骤2：新增告警建模}
+
+新增告警由参数 $(\theta,R,50)$ 确定，其目标坐标为：
+\begin{equation}
+    x_N=50+R\cos\theta, \qquad y_N=50+R\sin\theta .
+\end{equation}
+对新增告警同样按问题一的三个约束生成可观测候选站集 $\mathcal{S}_N$。
+
+\textbf{步骤3：重调度优化模型}
+
+设待重调度的告警集合为 $\mathcal{A}_r$（未开始观测的原告警与新增告警），剩余车辆集合为 $\mathcal{V}_r$。重调度为每个告警选择 2 台互异车辆与对应观测站，且两站交会角满足：
+\begin{equation}
+    \gamma_i\in[40^\circ,140^\circ], \qquad \forall i\in\mathcal{A}_r .
+\end{equation}
+各告警观测开始时刻由两车就绪时刻的较大者确定，时序仿真沿用问题二的递推规则。优化目标采用词典序：首先最大化窗口内成功开始观测的告警数，其次最小化最晚观测开始时间。该小规模组合优化问题通过穷举枚举保证全局最优\cite{si2015suanfa}。
+
+\textbf{步骤4：方案评价指标}
+
+在评价窗口 $[0,60]$ s 内，设 $N$ 为需观测告警总数（含新增告警），$k$ 为成功开始观测的告警数，完成率为：
+\begin{equation}
+    \eta=\frac{k}{N} .
+\end{equation}
+最晚观测开始时间为所有已开始观测告警的最晚开始时刻；若存在待处理告警无法在窗口结束前开始观测，则令：
+\begin{equation}
+    t_{\mathrm{last}}=60\ \text{s}.
+\end{equation}
+方案按 $\eta$ 由高到低排序，$\eta$ 相同时优先选择 $t_{\mathrm{last}}$ 较小者。保持原方案策略不进行重指派，故障车辆任务直接丢弃，新增告警在恢复后贪心指派给最早空闲的两台车。
+
+综上所述，本节完成了扰动建模、重调度优化与评价指标模型的建立，接下来将基于此进行场景求解与比较。

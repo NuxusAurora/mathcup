@@ -1,0 +1,53 @@
+
+% ════════════════════════════════════════════
+% 总体分析（02.总体分析.tex）—— 本节「正文 + 流程图」；写作提示词见本文件末尾【本章节写作提示词】。
+% ════════════════════════════════════════════
+\section{总体分析}
+
+针对本文所提出的问题，首先，针对问题一本文设计了车辆几何、视线遮挡与云台俯仰的三重约束判定框架，建立了以水平距离最小化为核心的最优观测站模型，分析了可观测区域的构成与俯仰角约束的临界作用，得出了最优水平距离与最优站坐标，改进了等值站位并列取舍规则，确保了单目标观测站选择的唯一性与合理性。接着，针对问题二，本文建立了两站交会定位的误差传播模型，以交会角与站距定义精度指标，在行驶时间约束下确定 T2 最优站对，并针对三告警并发场景建立车辆复用与路径规划的时序仿真模型，最小化最大观测开始时间，达成了多目标快速定位的目标。然后，针对问题三，本文建立了定位误差与指向误差的方位偏差传播模型，反解满足概率约束的最大允许行驶距离，并用蒙特卡洛验证了模型适用性。最后，针对问题四，本文提出了基于状态快照与枚举优化的扰动重调度模型，与保持原方案策略进行比较，达成了在故障与组合扰动下恢复完成率的目标。综上，本文设计了一个完整的可观测判定、交会定位、误差分析与动态重调度流程。具体的详细流程如图~\ref{fig:overall_analysis}~所示。
+
+% ── 总述文字结束后，画「问题分析总体流程图」（黑白简洁、风格统一）──
+\begin{figure}[htbp]
+    \begin{center}
+        \begin{tikzpicture}[x=1cm, y=1cm]
+
+            % ══════ 只需改这两处 ══════
+            \def\ns{6}   % 每问步骤数（固定：每个问题下面 6 个步骤；不含问题行与最上面总标题）
+            \def\rows{{问题一,约束建模,可观测区判定,最优站求解,观测质量度量,并列取舍,结果可视化},{问题二,交会精度建模,最优站对,交会角约束,车辆指派,时序仿真,启发式对比},{问题三,误差传播,标准差合成,概率约束,反解上界,蒙特卡洛,方差分解},{问题四,状态快照,扰动建模,重调度枚举,原方案对比,场景设计,指标评估}}
+            % ══════ 以下自动布局，一般不用改 ══════
+            \newcount\ncolcount\ncolcount=0
+            \foreach \row in \rows{\global\advance\ncolcount by1}
+            \edef\nq{\the\ncolcount}
+            \def\ystep{1.73}
+            \pgfmathtruncatemacro\qlast{\nq-1}
+            \pgfmathtruncatemacro\slast{\ns}
+            \pgfmathsetmacro\step{12.6/(\nq-1)}
+
+            % Level 0 — 总标题（内容改这里的 {…}，节点名 (root) 勿动）
+            \node[box] at (6.3, 0) (root) {总体分析流程};
+
+            % Level 1 问题行(p\k) + Level 2~ns 步骤列(s\k\j)——由 \rows 自动生成节点并自动编号
+            \foreach \row [count=\k from 0] in \rows{
+                \pgfmathsetmacro\x{\k*\step}
+                \foreach \it [count=\j from 1] in \row{
+                    \ifnum\j=1
+                        \node[box] at (\x, -\ystep) (p\k) {\it};
+                    \else
+                        \pgfmathsetmacro\y{-\ystep*\j}
+                        \node[box] at (\x, \y) (s\k\j) {\it};
+                    \fi
+                }
+            }
+
+            % 箭头：根 → 各问题
+            \foreach \k in {0,...,\qlast}{\draw[arrow] (root) -- (p\k);}
+            % 箭头：问题 → 该问第一个步骤
+            \foreach \k in {0,...,\qlast}{\draw[arrow] (p\k) -- (s\k2);}
+            % 箭头：同一问内步骤逐个串联
+            \foreach \k in {0,...,\qlast}{\foreach \j in {2,...,\slast}{\pgfmathtruncatemacro\nxt{\j+1}\draw[arrow] (s\k\j) -- (s\k\nxt);}}
+
+        \end{tikzpicture}
+        \caption{问题分析总体流程图}
+        \label{fig:overall_analysis}
+    \end{center}
+\end{figure}

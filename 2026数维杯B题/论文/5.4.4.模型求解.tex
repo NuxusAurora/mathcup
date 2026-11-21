@@ -1,0 +1,69 @@
+
+% ════════════════════════════════════════════
+% 模型求解（5.4.4.模型求解.tex，三级子块）—— 写作提示词见本文件末尾【本章节写作提示词】。
+% ════════════════════════════════════════════
+\subsubsection{模型求解}
+
+基于上述模型，本节对 20 个代表性场景进行重调度与保持原方案的对比求解。求解环境为 Python 3 与 NumPy，代表性场景结果如表\ref{tab:结果5}所示。
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.30\textwidth}>{\centering\arraybackslash}p{0.20\textwidth}>{\centering\arraybackslash}p{0.20\textwidth}>{\centering\arraybackslash}p{0.18\textwidth}}
+  \caption{问题四代表性场景求解结果}
+  \label{tab:结果5} \\
+  \toprule
+  扰动 & $\eta$重调度 & $\eta$原方案 & $t_{\mathrm{last}}$重调度(s) \\
+  \midrule
+  \endfirsthead
+  \caption{问题四代表性场景求解结果（续）} \\
+  \toprule
+  扰动 & $\eta$重调度 & $\eta$原方案 & $t_{\mathrm{last}}$重调度(s) \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  新增告警 $\theta=0^\circ$ & 1.00 & 1.00 & 15.9 \\
+  新增告警 $\theta=180^\circ$ & 1.00 & 1.00 & 17.3 \\
+  故障 V2 & 1.00 & 0.67 & 15.5 \\
+  故障 V5 & 1.00 & 0.67 & 12.9 \\
+  通信 $t_{\mathrm{rec}}=15$ & 1.00 & 1.00 & 12.1 \\
+  新增告警+故障 V2 & 1.00 & 0.75 & 23.9 \\
+  故障 V3+通信 & 1.00 & 0.67 & 13.1 \\
+  新增告警+故障 V5+通信 & 1.00 & 0.75 & 16.3 \\
+\end{longtable}
+
+如图\ref{fig:4_1}所示，基线调度中 T3 在 2.766 s 即开始观测，早于 5 s 扰动时刻，按规则视为已完成；T1、T2 在扰动时刻尚未开始观测，可在重调度中被重新指派。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.68\textwidth]{../求解/问题四/图片/图4-1\_基线调度甘特.png}
+  \caption{基线调度甘特时间轴}
+  \label{fig:4_1}
+\end{figure}
+
+如图\ref{fig:4_5}所示，在单车辆故障场景下，重调度均能将完成率恢复至 1.00，而保持原方案在故障车服务未完成告警时完成率降至 0.67，说明重调度通过车辆复用有效补偿了故障带来的能力损失。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.66\textwidth]{../求解/问题四/图片/图4-5\_故障车辆影响.png}
+  \caption{单车辆故障场景完成率对比}
+  \label{fig:4_5}
+\end{figure}
+
+如图\ref{fig:4_4}所示，在仅新增告警场景下两种方案的完成率均为 1.00，但重调度的最晚观测开始时间整体更小，体现了对新增告警的及时吸纳。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.66\textwidth]{../求解/问题四/图片/图4-4\_新增告警方向影响.png}
+  \caption{新增告警方向对完成率的影响}
+  \label{fig:4_4}
+\end{figure}
+
+如图\ref{fig:4_3}所示，20 个场景的完成率对比表明，重调度在故障与组合扰动场景下显著优于保持原方案，在纯新增告警与通信场景下两者相当。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.72\textwidth]{../求解/问题四/图片/图4-3\_各场景完成率对比.png}
+  \caption{各场景完成率对比}
+  \label{fig:4_3}
+\end{figure}
+
+由表\ref{tab:结果5}可知，重调度收益主要来自车辆故障场景：保持原方案因故障车任务无法接替而损失完成率，重调度将空闲车辆及时调拨至未完成告警。综合以上结果，问题四验证了重调度模型在扰动环境下维持完成率的有效性。

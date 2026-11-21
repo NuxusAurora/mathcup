@@ -1,0 +1,44 @@
+
+% ════════════════════════════════════════════
+% 附录（11.附录.tex）—— 写作提示词见本文件末尾【本章节写作提示词】。
+% ════════════════════════════════════════════
+\newpage
+\makeatletter
+\let\@oldaddcontentsline\addcontentsline
+\renewcommand{\addcontentsline}[3]{}
+
+\section*{附录}
+\let\addcontentsline\@oldaddcontentsline
+\makeatother
+
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\centering\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.60\textwidth}}
+  \caption{附件说明表}
+  \label{tab:appendix} \\
+  \toprule
+  文件 & 说明 \\
+  \midrule
+  \endfirsthead
+  \caption{附件说明表（续）} \\
+  \toprule
+  文件 & 说明 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  求解/\allowbreak{}问题一/\allowbreak{}问题一.py & 问题一可观测区域与最优观测站求解代码 \\
+  求解/\allowbreak{}问题二/\allowbreak{}问题二.py & 问题二交会定位与并发调度求解代码 \\
+  求解/\allowbreak{}问题三/\allowbreak{}问题三.py & 问题三误差传播与蒙特卡洛验证代码 \\
+  求解/\allowbreak{}问题四/\allowbreak{}问题四.py & 问题四扰动重调度与场景比较代码 \\
+  求解/\allowbreak{}\_common.py & 公共绘图与文件工具（字体、高清出图、CSV 读写等） \\
+  求解/\allowbreak{}\_geometry.py & 公共几何模块（建筑/车辆/告警参数与可观测性判定） \\
+  求解/\allowbreak{}问题一/\allowbreak{}结果/\allowbreak{}问题一\_\allowbreak{}最优观测站参数.csv & 问题一最优站参数结果 \\
+  求解/\allowbreak{}问题二/\allowbreak{}结果/\allowbreak{}问题二\_\allowbreak{}1\_\allowbreak{}T2最优站对.csv & 问题二 T2 最优站对结果 \\
+  求解/\allowbreak{}问题二/\allowbreak{}结果/\allowbreak{}问题二\_\allowbreak{}2\_\allowbreak{}最优调度时间轴.csv & 问题二并发调度完整时间轴 \\
+  求解/\allowbreak{}问题三/\allowbreak{}结果/\allowbreak{}问题三\_\allowbreak{}误差传播结果.csv & 问题三误差传播与参数约束结果 \\
+  求解/\allowbreak{}问题四/\allowbreak{}结果/\allowbreak{}问题四\_\allowbreak{}场景结果.csv & 问题四各场景完成率与最晚时间 \\
+  求解/\allowbreak{}问题一/\allowbreak{}图片/\allowbreak{}图1-1至图1-22 & 问题一可观测区域与最优站可视化（22 张） \\
+  求解/\allowbreak{}问题二/\allowbreak{}图片/\allowbreak{}图2-1至图2-23 & 问题二交会定位与调度可视化（23 张） \\
+  求解/\allowbreak{}问题三/\allowbreak{}图片/\allowbreak{}图3-1至图3-22 & 问题三误差传播与灵敏度可视化（22 张） \\
+  求解/\allowbreak{}问题四/\allowbreak{}图片/\allowbreak{}图4-1至图4-20 & 问题四重调度与场景对比可视化（20 张） \\
+\end{longtable}

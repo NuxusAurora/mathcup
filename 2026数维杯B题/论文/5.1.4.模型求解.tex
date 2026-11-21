@@ -1,0 +1,49 @@
+
+% ════════════════════════════════════════════
+% 模型求解（5.1.4.模型求解.tex，三级子块）—— 写作提示词见本文件末尾【本章节写作提示词】。
+% ════════════════════════════════════════════
+\subsubsection{模型求解}
+
+基于上述模型，本节以 0.5 m 网格对 100 m 见方区域离散，并沿最优圆弧以 0.025 度步长细化求解。求解环境为 Python 3 与 NumPy、Matplotlib，核心结果如表\ref{tab:结果1}所示。
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.30\textwidth}>{\centering\arraybackslash}p{0.66\textwidth}}
+  \caption{问题一最优观测站求解结果}
+  \label{tab:结果1} \\
+  \toprule
+  指标 & 结果 \\
+  \midrule
+  \endfirsthead
+  \caption{问题一最优观测站求解结果（续）} \\
+  \toprule
+  指标 & 结果 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  最优水平距离 $r^*$ & 7.582 m \\
+  视线俯仰角 $\varphi^*$ & 80.0 度 \\
+  最优站坐标 & (91.155, 66.121) m \\
+  就近车辆及行驶距离 & V4，3.673 m（1.224 s） \\
+  可观测区域面积 & 约 5697 平方米 \\
+  等值最优站数量 & 可行圆弧（连续） \\
+\end{longtable}
+
+如图\ref{fig:1_2}所示，T1 可观测区域主要分布在其东侧开阔地带，西部与建筑 B2 相邻处被排除，俯仰约束在目标周围划出一个以 80 度为边界的圆形盲区。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.62\textwidth]{../求解/问题一/图片/图1-2\_T1可观测区域掩膜.png}
+  \caption{T1 可观测区域掩膜}
+  \label{fig:1_2}
+\end{figure}
+
+如图\ref{fig:1_10}所示，最优观测站位于目标东南方向、俯仰角恰好达到 80 度的圆弧上，由并列取舍规则取就近车辆 V4 行驶距离最小者，验证了最优站选取的合理性与唯一性。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.62\textwidth]{../求解/问题一/图片/图1-10\_最优观测站标注.png}
+  \caption{最优观测站标注}
+  \label{fig:1_10}
+\end{figure}
+
+由表\ref{tab:结果1}可知，最优水平距离为 7.582 m，恰为俯仰约束取等号时的下界，俯仰约束是决定最优值的紧约束，几何与遮挡约束在最优站处均有余量。综合以上结果，问题一所得最优站可被车辆 V4 以极短行驶时间到达，且观测质量达到理论最大。

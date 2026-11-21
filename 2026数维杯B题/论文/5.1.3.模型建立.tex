@@ -1,0 +1,63 @@
+
+% ════════════════════════════════════════════
+% 模型建立（5.1.3.模型建立.tex，三级子块）—— 写作提示词见本文件末尾【本章节写作提示词】。
+% ════════════════════════════════════════════
+\subsubsection{模型建立}
+
+针对问题一，本节将从车辆几何、视线遮挡与云台俯仰三个约束角度建立可观测性判定模型与最优观测站优化模型。具体过程如下。
+
+\textbf{步骤1：车辆几何约束}
+
+首先，将观测车建模为等效半径 $r_v=1.5$ m 的圆盘，其中心即相机位置 $(x,y)$。圆盘须位于区域边界之内且不侵入建筑，则中心坐标满足：
+\begin{equation}
+    r_v \le x \le 100 - r_v, \qquad r_v \le y \le 100 - r_v .
+\end{equation}
+设第 $k$ 栋建筑 $B_k$ 的平面范围为 $[x_k^{\min},x_k^{\max}]\times[y_k^{\min},y_k^{\max}]$，则圆盘中心到该建筑矩形的距离为：
+\begin{equation}
+    d_k(x,y)=\sqrt{\max(x_k^{\min}-x,\,0,\,x-x_k^{\max})^2+\max(y_k^{\min}-y,\,0,\,y-y_k^{\max})^2}.
+\end{equation}
+车辆不侵入建筑要求：
+\begin{equation}
+    d_k(x,y) \ge r_v, \qquad k=1,2,\dots,5 .
+\end{equation}
+
+\textbf{步骤2：视线遮挡约束}
+
+相机离地高度为 $h_c=2$ m，视线为从 $(x,y,h_c)$ 到 $(x_T,y_T,H)$ 的三维线段。将其参数化为：
+\begin{equation}
+    \bm{P}(t)=(x+t(x_T-x),\, y+t(y_T-y),\, h_c+t(H-h_c)), \qquad t\in[0,1] .
+\end{equation}
+对第 $k$ 栋建筑棱柱 $[x_k^{\min},x_k^{\max}]\times[y_k^{\min},y_k^{\max}]\times[0,h_k]$，用 slab 方法逐轴求参数区间：
+\begin{equation}
+    t_{\min}=\max_{j}\min\!\left(\frac{l_j-p_{0j}}{p_{1j}-p_{0j}},\frac{u_j-p_{0j}}{p_{1j}-p_{0j}}\right), \quad
+    t_{\max}=\min_{j}\max\!\left(\frac{l_j-p_{0j}}{p_{1j}-p_{0j}},\frac{u_j-p_{0j}}{p_{1j}-p_{0j}}\right).
+\end{equation}
+其中，$l_j$、$u_j$ 为第 $j$ 轴上下界。当 $t_{\min}\le t_{\max}$ 时线段与棱柱相交（含接触），判定为遮挡；线段与任一建筑相交即不可观测。该判定属于空间线段与轴对齐盒相交的经典计算几何问题\cite{zhang2004juzhen}。
+
+\textbf{步骤3：云台俯仰约束}
+
+视线俯仰角为视线与水平面的夹角：
+\begin{equation}
+    \varphi(x,y)=\arctan\!\frac{H-h_c}{r}, \qquad r=\sqrt{(x-x_T)^2+(y-y_T)^2}.
+\end{equation}
+云台俯仰范围为 $[-10^\circ,80^\circ]$，由于 $H>h_c$ 恒有 $\varphi>0$，故俯仰约束等价于：
+\begin{equation}
+    r \ge \frac{H-h_c}{\tan 80^\circ}.
+\end{equation}
+对 T1 代入 $H-h_c=43$ m，得 $r\ge 7.582$ m。
+
+\textbf{步骤4：最优观测站优化模型}
+
+以观测质量 $Q=1/r$（量纲为 m$^{-1}$，仅为把“最小距离”改写为“最大质量”的单调变换）为准则，最大化 $Q$ 等价于最小化水平距离 $r$，最优观测站优化模型为：
+\begin{equation}
+    \min_{(x,y)} \; r \quad \text{s.t.} \quad
+    \begin{cases}
+    r_v\le x\le 100-r_v,\; r_v\le y\le 100-r_v,\\
+    d_k(x,y)\ge r_v,\; k=1,\dots,5,\\
+    \bm{P}(t)\;\text{不与任一建筑相交},\\
+    r \ge \dfrac{H-h_c}{\tan 80^\circ}.
+    \end{cases}
+\end{equation}
+其中，俯仰约束取等号时给出 $r^*=\dfrac{H-h_c}{\tan 80^\circ}$，即最优站落在以 T1 为圆心、$r^*$ 为半径的可行圆弧上。若存在多个等值站位，采用两级并列取舍规则：首先取离某车辆初始位置行驶距离最小者，其次取到建筑与边界的净距最大者。
+
+综上所述，本节完成了问题一可观测性判定与最优观测站模型的建立，得到了以水平距离最小化为目标的优化模型，接下来将基于此进行求解。

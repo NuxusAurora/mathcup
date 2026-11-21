@@ -1,0 +1,40 @@
+
+% ════════════════════════════════════════════
+% 模型准备（5.1.2.模型准备.tex，三级子块）—— 写作提示词见本文件末尾【本章节写作提示词】。
+% ════════════════════════════════════════════
+\subsubsection{模型准备}
+
+\textbf{1.数据预处理}
+
+本问数据均由题面直接给出，不存在缺失值或异常值，无需进行填补与平滑等常规预处理，仅需将建筑、车辆与告警参数结构化并进行坐标换算。为便于后续建模，首先对告警参数进行坐标换算，具体步骤如下。
+
+将告警 $(\theta,R,H)$ 换算为目标水平坐标。设调度中心为 $O=(50,50)$，则目标水平位置为：
+\begin{equation}
+    x_T = 50 + R\cos\theta, \qquad y_T = 50 + R\sin\theta .
+\end{equation}
+其中，$R$ 为水平距离，$\theta$ 为自正东方向逆时针量测的方位角。对 T1 代入 $\theta=30^\circ$、$R=40$ 得 $x_T\approx 84.64$、$y_T\approx 70$，目标高度 $H=45$ m。同时将 5 栋建筑记为 $B_1\sim B_5$，5 台车辆初始位置记为 $V_1\sim V_5$，作为可观测性判定的输入。
+
+\textbf{2.算法选择}
+
+针对本问可观测区域判定与最优站求解，需在解析法、网格枚举法与数学规划法之间择优，从计算精度、求解效率与几何适应性三个维度对比其适用性，如表\ref{tab:algo1}所示。
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.20\textwidth}>{\centering\arraybackslash}p{0.22\textwidth}>{\centering\arraybackslash}p{0.22\textwidth}>{\centering\arraybackslash}p{0.24\textwidth}}
+  \caption{问题一候选算法对比}
+  \label{tab:algo1} \\
+  \toprule
+  算法 & 计算精度 & 求解效率 & 几何适应性 \\
+  \midrule
+  \endfirsthead
+  \caption{问题一候选算法对比（续）} \\
+  \toprule
+  算法 & 计算精度 & 求解效率 & 几何适应性 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  解析法 & 高 & 高 & 仅适用规则几何 \\
+  网格枚举法 & 与网格分辨率相关 & 中 & 强，任意几何 \\
+  数学规划法 & 高 & 中 & 依赖约束线性化 \\
+\end{longtable}
+
+如表\ref{tab:algo1}所示，解析法可给出最优距离的精确闭式解，网格枚举法可完整刻画复杂遮挡下的可观测区域边界。综合以上分析，本问选择解析推导确定最优值、网格枚举验证区域形态的解析与数值结合方法进行求解，并借助 MATLAB 等科学计算工具完成数值实现\cite{zhuo2014matlab}。

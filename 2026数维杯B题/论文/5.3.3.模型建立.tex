@@ -1,0 +1,61 @@
+
+% ════════════════════════════════════════════
+% 模型建立（5.3.3.模型建立.tex，三级子块）—— 写作提示词见本文件末尾【本章节写作提示词】。
+% ════════════════════════════════════════════
+\subsubsection{模型建立}
+
+针对问题三，本节将建立定位误差与指向误差对水平方位精度的误差传播模型，并反解最大允许行驶距离。具体过程如下。
+
+\textbf{步骤1：方位偏差误差传播模型}
+
+设目标相对真实车辆位置的水平向量为 $(X,Y)=(x_T-x,\,y_T-y)$，车辆位置估计误差为 $(\delta x,\delta y)$。真实方位角与指令方位角分别为 $\alpha=\operatorname{atan2}(Y,X)$ 与 $\hat\alpha=\operatorname{atan2}(Y-\delta y,\,X-\delta x)$，则指令方位角偏差为：
+\begin{equation}
+    \Delta\psi=\hat\alpha-\alpha .
+\end{equation}
+对 $\hat\alpha$ 在 $(\delta x,\delta y)=(0,0)$ 处做一阶泰勒展开，得：
+\begin{equation}
+    \Delta\psi \approx \frac{\partial\alpha}{\partial x}\delta x+\frac{\partial\alpha}{\partial y}\delta y
+    =\frac{Y\,\delta x-X\,\delta y}{r^2},
+\end{equation}
+其中，$r=\sqrt{X^2+Y^2}$。由 $\delta x,\delta y$ 独立且标准差均为 $\sigma_{\mathrm{pos}}$，得定位引起的方位偏差标准差为：
+\begin{equation}
+    \sigma_{\psi,\mathrm{pos}}=\sqrt{\frac{Y^2\sigma_{\mathrm{pos}}^2+X^2\sigma_{\mathrm{pos}}^2}{r^4}}=\frac{\sigma_{\mathrm{pos}}}{r}.
+\end{equation}
+化为角度制并代入 $r=40$ m，得换算系数 $K_\psi=\dfrac{180}{\pi r}\approx 1.432$ 度/m。
+
+\textbf{步骤2：三类误差源方差合成}
+
+总水平方位偏差由定位误差、零位偏差与控制误差三部分组成，三者相互独立，故总标准差为：
+\begin{equation}
+    \sigma_{\mathrm{total}}(s)=\sqrt{\big(K_\psi\,\sigma_{\mathrm{pos}}(s)\big)^2+\sigma_z^2+\sigma_c^2},
+\end{equation}
+其中，$\sigma_z=0.8^\circ$、$\sigma_c=0.6^\circ$，$\sigma_{\mathrm{pos}}(s)=0.3+0.02s$。
+
+\textbf{步骤3：概率约束反解}
+
+总方位偏差近似服从零均值正态分布，这一分布合成依据概率论中独立正态变量线性叠加仍为正态的性质\cite{sheng2008gailv,liu2014suiji}，定位误差的随机传播可参考卫星定位中的误差分析方法\cite{xie2009gps}。概率约束为：
+\begin{equation}
+    P(\lvert\Delta\psi\rvert\le 5^\circ)=2\Phi\!\left(\frac{5^\circ}{\sigma_{\mathrm{total}}}\right)-1\ge 0.95 .
+\end{equation}
+由 $\Phi(1.96)=0.975$，等价于：
+\begin{equation}
+    \sigma_{\mathrm{total}}\le \frac{5^\circ}{1.96}=2.551^\circ .
+\end{equation}
+代入式(23)反解定位标准差上限：
+\begin{equation}
+    \sigma_{\mathrm{pos}}\le \frac{1}{K_\psi}\sqrt{2.551^2-0.8^2-0.6^2}=1.638\ \text{m}.
+\end{equation}
+再由 $\sigma_{\mathrm{pos}}(s)=0.3+0.02s$，得最大允许行驶距离：
+\begin{equation}
+    s_{\max}=\frac{1.638-0.3}{0.02}=66.92\ \text{m}.
+\end{equation}
+
+\textbf{步骤4：误差模型参数约束}
+
+当车辆行驶 80 m 仍须满足同等精度时，设 $\sigma(s)=a+bs$，则需：
+\begin{equation}
+    a+80b\le 1.638\ \text{m}, \qquad a\ge 0,\ b\ge 0 .
+\end{equation}
+该式给出了非负参数 $a$、$b$ 的可行域；当前参数 $(a,b)=(0.3,0.02)$ 对应的 $\sigma(80)=1.9$ m 已超出上限，说明须改进定位装置或减小误差增长斜率。
+
+综上所述，本节完成了方位偏差误差传播模型与最大行驶距离反解模型的建立，接下来将基于此进行求解与验证。

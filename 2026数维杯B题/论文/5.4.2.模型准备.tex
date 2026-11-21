@@ -1,0 +1,34 @@
+
+% ════════════════════════════════════════════
+% 模型准备（5.4.2.模型准备.tex，三级子块）—— 写作提示词见本文件末尾【本章节写作提示词】。
+% ════════════════════════════════════════════
+\subsubsection{模型准备}
+
+\textbf{1.数据预处理}
+
+本问以问题二所得最优调度时间轴为基线输入，直接读取各车辆的任务序列、观测站坐标与关键事件时刻，无需额外数据清洗。为便于重调度建模，首先将基线调度结构化：告警 T3、T2、T1 的观测开始时刻分别为 2.766 s、6.963 s、12.063 s，其中 T3 在扰动时刻 5 s 前已开始观测，视为已完成；T1、T2 尚未开始观测，其车辆可被重新指派。新增告警参数在 $\theta\in[0^\circ,360^\circ)$、$R\in[30,50]$ m、$H=50$ m 范围内按代表性方向与距离取值。
+
+\textbf{2.算法选择}
+
+针对本问重调度，需在枚举重调度、贪心重调度与保持原方案之间择优，从求解质量、响应速度与鲁棒性三个维度对比其适用性，如表\ref{tab:algo4}所示。
+
+\begin{longtable}{>{\centering\arraybackslash}p{0.20\textwidth}>{\centering\arraybackslash}p{0.22\textwidth}>{\centering\arraybackslash}p{0.22\textwidth}>{\centering\arraybackslash}p{0.24\textwidth}}
+  \caption{问题四候选策略对比}
+  \label{tab:algo4} \\
+  \toprule
+  策略 & 求解质量 & 响应速度 & 鲁棒性 \\
+  \midrule
+  \endfirsthead
+  \caption{问题四候选策略对比（续）} \\
+  \toprule
+  策略 & 求解质量 & 响应速度 & 鲁棒性 \\
+  \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  枚举重调度 & 全局最优 & 小规模可接受 & 强 \\
+  贪心重调度 & 局部最优 & 快 & 中 \\
+  保持原方案 & 无重规划 & 最快 & 弱 \\
+\end{longtable}
+
+如表\ref{tab:algo4}所示，本问剩余告警数不超过 3、剩余车辆数不超过 5，枚举重调度可在秒级内完成全局寻优。综合以上分析，本问以枚举重调度为主方案，以保持原方案为基准策略进行对比。
