@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "project_title": "2026 数维杯 B题 · 读题与建模",
-  "revision": 13,
-  "updated_at": "2026-11-21T03:13:13+00:00",
+  "revision": 14,
+  "updated_at": "2026-11-21T03:16:26+00:00",
   "nodes": [
     {
       "id": "A",
@@ -104,10 +104,11 @@
           "label": "第二问 · 精度与时序实验",
           "path": "第二问/文档/第二问精度与时序实验.md",
           "preview": {
-            "source_sha256": "d87e58cb6872c3c342432244feb956a2b16362658c16cb99e8a69ec861121b5f",
+            "source_sha256": "ee1518683e2dc1e7f21fe0c3c1c587df6fa0c091492cbaa3c352f6734ffb96fa",
             "pages": [
               "第二问/图片/预览/实验-1.png",
-              "第二问/图片/预览/实验-2.png"
+              "第二问/图片/预览/实验-2.png",
+              "第二问/图片/预览/实验-3.png"
             ]
           }
         },
@@ -233,10 +234,11 @@
           "label": "第二问 · 精度与时序实验",
           "path": "第二问/文档/第二问精度与时序实验.md",
           "preview": {
-            "source_sha256": "d87e58cb6872c3c342432244feb956a2b16362658c16cb99e8a69ec861121b5f",
+            "source_sha256": "ee1518683e2dc1e7f21fe0c3c1c587df6fa0c091492cbaa3c352f6734ffb96fa",
             "pages": [
               "第二问/图片/预览/实验-1.png",
-              "第二问/图片/预览/实验-2.png"
+              "第二问/图片/预览/实验-2.png",
+              "第二问/图片/预览/实验-3.png"
             ]
           }
         },
