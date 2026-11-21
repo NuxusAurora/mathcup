@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "project_title": "2026 数维杯 B题 · 读题与建模",
-  "revision": 5,
-  "updated_at": "2026-11-21T02:20:40+00:00",
+  "revision": 6,
+  "updated_at": "2026-11-21T02:32:24+00:00",
   "nodes": [
     {
       "id": "A",
@@ -76,8 +76,8 @@
       "id": "C",
       "kind": "stage",
       "title": "实现与求解",
-      "status": "blocked",
-      "summary": "已完成第三问数值解、几何与误差复核及固定计划计分上界。",
+      "status": "running",
+      "summary": "第一问 T1 可观测区域图及面积已复核，第三问已求解。其余优化与场景实绩待计算。",
       "depends_on": [
         "B"
       ],
@@ -85,6 +85,14 @@
         "B题建模稿.md"
       ],
       "outputs": [
+        {
+          "label": "第一问 · T1 可观测区域",
+          "path": "T1可观测区域.png"
+        },
+        {
+          "label": "第一问 · 绘图与截面积分",
+          "path": "q1_figure.py"
+        },
         {
           "label": "数值实验与边界复核（3 页）",
           "path": "四问数值复核.pdf",
@@ -114,9 +122,7 @@
           "path": "measurement_run.py"
         }
       ],
-      "blockers": [
-        "全题尚缺针对无人机目标的具体布站与车辆改派方案。"
-      ],
+      "blockers": [],
       "checks": [
         {
           "label": "实际运行完成，候选与失败有明确状态",
@@ -127,6 +133,11 @@
           "label": "第三问数值积分与直接随机抽样",
           "status": "passed",
           "detail": "100 万样本、两档积分网格；结果见数值实验。"
+        },
+        {
+          "label": "第一问可观测面积",
+          "status": "passed",
+          "detail": "0.05 m 网格为 5608.53 m²；独立截面积分为 5608.77 m²。"
         }
       ]
     },
@@ -134,8 +145,8 @@
       "id": "D",
       "kind": "stage",
       "title": "结果验证",
-      "status": "blocked",
-      "summary": "已完成第三问数值解、几何与误差复核及固定计划计分上界。",
+      "status": "running",
+      "summary": "第一问 T1 可观测区域图及面积已复核，第三问已求解。其余优化与场景实绩待计算。",
       "depends_on": [
         "C"
       ],
@@ -143,6 +154,14 @@
         "B题建模稿.md"
       ],
       "outputs": [
+        {
+          "label": "第一问 · T1 可观测区域",
+          "path": "T1可观测区域.png"
+        },
+        {
+          "label": "第一问 · 绘图与截面积分",
+          "path": "q1_figure.py"
+        },
         {
           "label": "数值实验与边界复核（3 页）",
           "path": "四问数值复核.pdf",
@@ -172,9 +191,7 @@
           "path": "measurement_run.py"
         }
       ],
-      "blockers": [
-        "全题尚缺针对无人机目标的具体布站与车辆改派方案。"
-      ],
+      "blockers": [],
       "checks": [
         {
           "label": "正式结果可追溯，结论强度符合证据",
@@ -185,6 +202,11 @@
           "label": "第三问数值积分与直接随机抽样",
           "status": "passed",
           "detail": "100 万样本、两档积分网格；结果见数值实验。"
+        },
+        {
+          "label": "第一问可观测面积",
+          "status": "passed",
+          "detail": "0.05 m 网格为 5608.53 m²；独立截面积分为 5608.77 m²。"
         }
       ]
     },
