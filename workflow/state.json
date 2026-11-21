@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "project_title": "2026 数维杯 B题 · 读题与建模",
-  "revision": 10,
-  "updated_at": "2026-11-21T02:44:57+00:00",
+  "revision": 11,
+  "updated_at": "2026-11-21T02:54:23+00:00",
   "nodes": [
     {
       "id": "A",
@@ -52,9 +52,10 @@
           "label": "第一问 · 推导与结果",
           "path": "第一问/文档/第一问推导与结果.md",
           "preview": {
-            "source_sha256": "8755f09060b295ce0a75f2130930a082b28a636195eac995f3771a6bb4af362a",
+            "source_sha256": "8e7e0e23e6d4f8b88185047518f73ef47797fee25b728d9004a43b9f372ba196",
             "pages": [
-              "第一问/图片/预览/derivation.png"
+              "第一问/图片/预览/derivation.png",
+              "第一问/图片/预览/derivation-2.png"
             ]
           }
         },
@@ -99,9 +100,10 @@
           "label": "第一问 · 推导与结果",
           "path": "第一问/文档/第一问推导与结果.md",
           "preview": {
-            "source_sha256": "8755f09060b295ce0a75f2130930a082b28a636195eac995f3771a6bb4af362a",
+            "source_sha256": "8e7e0e23e6d4f8b88185047518f73ef47797fee25b728d9004a43b9f372ba196",
             "pages": [
-              "第一问/图片/预览/derivation.png"
+              "第一问/图片/预览/derivation.png",
+              "第一问/图片/预览/derivation-2.png"
             ]
           }
         },
@@ -195,9 +197,10 @@
           "label": "第一问 · 推导与结果",
           "path": "第一问/文档/第一问推导与结果.md",
           "preview": {
-            "source_sha256": "8755f09060b295ce0a75f2130930a082b28a636195eac995f3771a6bb4af362a",
+            "source_sha256": "8e7e0e23e6d4f8b88185047518f73ef47797fee25b728d9004a43b9f372ba196",
             "pages": [
-              "第一问/图片/预览/derivation.png"
+              "第一问/图片/预览/derivation.png",
+              "第一问/图片/预览/derivation-2.png"
             ]
           }
         },
