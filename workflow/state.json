@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "project_title": "2026 数维杯 B题 · 读题与建模",
-  "revision": 8,
-  "updated_at": "2026-11-21T02:37:59+00:00",
+  "revision": 9,
+  "updated_at": "2026-11-21T02:41:12+00:00",
   "nodes": [
     {
       "id": "A",
@@ -15,15 +15,15 @@
       "outputs": [
         {
           "label": "B题建模稿",
-          "path": "B题建模稿.md",
+          "path": "综合/B题建模稿.md",
           "preview": {
-            "source_sha256": "398ccbc4ef11713e9a5c5f936a41cafcdbe262c28b4ba96eed5b4ff230f7a872",
+            "source_sha256": "4075cc64ce063ac2f4fce4be869cc07c5740a1afa9ce26db6526bfc86250ab17",
             "pages": [
-              "previews/formulas/part-1.png",
-              "previews/formulas/part-2.png",
-              "previews/formulas/part-3.png",
-              "previews/formulas/part-4.png",
-              "previews/formulas/part-5.png"
+              "综合/预览/建模稿/part-1.png",
+              "第一问/建模说明.png",
+              "第二问/建模说明.png",
+              "第三问/建模说明.png",
+              "第四问/建模说明.png"
             ]
           }
         }
@@ -50,25 +50,25 @@
       "outputs": [
         {
           "label": "第一问 · 推导与结果",
-          "path": "第一问推导与结果.md",
+          "path": "第一问/第一问推导与结果.md",
           "preview": {
             "source_sha256": "8755f09060b295ce0a75f2130930a082b28a636195eac995f3771a6bb4af362a",
             "pages": [
-              "previews/q1/derivation.png"
+              "第一问/预览/derivation.png"
             ]
           }
         },
         {
           "label": "B题建模稿",
-          "path": "B题建模稿.md",
+          "path": "综合/B题建模稿.md",
           "preview": {
-            "source_sha256": "398ccbc4ef11713e9a5c5f936a41cafcdbe262c28b4ba96eed5b4ff230f7a872",
+            "source_sha256": "4075cc64ce063ac2f4fce4be869cc07c5740a1afa9ce26db6526bfc86250ab17",
             "pages": [
-              "previews/formulas/part-1.png",
-              "previews/formulas/part-2.png",
-              "previews/formulas/part-3.png",
-              "previews/formulas/part-4.png",
-              "previews/formulas/part-5.png"
+              "综合/预览/建模稿/part-1.png",
+              "第一问/建模说明.png",
+              "第二问/建模说明.png",
+              "第三问/建模说明.png",
+              "第四问/建模说明.png"
             ]
           }
         }
@@ -92,58 +92,66 @@
         "B"
       ],
       "inputs": [
-        "B题建模稿.md"
+        "综合/B题建模稿.md"
       ],
       "outputs": [
         {
           "label": "第一问 · 推导与结果",
-          "path": "第一问推导与结果.md",
+          "path": "第一问/第一问推导与结果.md",
           "preview": {
             "source_sha256": "8755f09060b295ce0a75f2130930a082b28a636195eac995f3771a6bb4af362a",
             "pages": [
-              "previews/q1/derivation.png"
+              "第一问/预览/derivation.png"
             ]
           }
         },
         {
           "label": "第一问 · T1 三维可观测区域",
-          "path": "T1可观测区域_三维.png"
+          "path": "第一问/T1可观测区域_三维.png"
         },
         {
           "label": "第一问 · T1 可观测区域",
-          "path": "T1可观测区域.png"
+          "path": "第一问/T1可观测区域.png"
         },
         {
           "label": "第一问 · 绘图与截面积分",
-          "path": "q1_figure.py"
+          "path": "第一问/q1_figure.py"
         },
         {
           "label": "数值实验与边界复核（3 页）",
-          "path": "四问数值复核.pdf",
+          "path": "综合/四问数值复核.pdf",
           "preview": {
             "source_sha256": "22fc6f8be42175c155bc03a80cec993a49641160bfd787cf1e6f876507203b08",
             "pages": [
-              "previews/audit/page-1.png",
-              "previews/audit/page-2.png",
-              "previews/audit/page-3.png"
+              "综合/预览/数值复核/page-1.png",
+              "综合/预览/数值复核/page-2.png",
+              "综合/预览/数值复核/page-3.png"
             ]
           }
         },
         {
           "label": "复核脚本",
-          "path": "check_bounds.py"
+          "path": "综合/check_bounds.py"
         },
         {
           "label": "第三问数值实验",
-          "path": "第三问数值实验.md"
+          "path": "第三问/第三问数值实验.md"
         },
         {
           "label": "实验数据",
-          "path": "measurement_results.json"
+          "path": "第三问/measurement_results.json"
         },
         {
           "label": "复现脚本",
-          "path": "measurement_run.py"
+          "path": "第三问/measurement_run.py"
+        },
+        {
+          "label": "第二问 · 双站精度复核",
+          "path": "第二问/双站精度复核.md"
+        },
+        {
+          "label": "第四问 · 七类扰动计分",
+          "path": "第四问/七类扰动计分.md"
         }
       ],
       "blockers": [],
@@ -180,58 +188,66 @@
         "C"
       ],
       "inputs": [
-        "B题建模稿.md"
+        "综合/B题建模稿.md"
       ],
       "outputs": [
         {
           "label": "第一问 · 推导与结果",
-          "path": "第一问推导与结果.md",
+          "path": "第一问/第一问推导与结果.md",
           "preview": {
             "source_sha256": "8755f09060b295ce0a75f2130930a082b28a636195eac995f3771a6bb4af362a",
             "pages": [
-              "previews/q1/derivation.png"
+              "第一问/预览/derivation.png"
             ]
           }
         },
         {
           "label": "第一问 · T1 三维可观测区域",
-          "path": "T1可观测区域_三维.png"
+          "path": "第一问/T1可观测区域_三维.png"
         },
         {
           "label": "第一问 · T1 可观测区域",
-          "path": "T1可观测区域.png"
+          "path": "第一问/T1可观测区域.png"
         },
         {
           "label": "第一问 · 绘图与截面积分",
-          "path": "q1_figure.py"
+          "path": "第一问/q1_figure.py"
         },
         {
           "label": "数值实验与边界复核（3 页）",
-          "path": "四问数值复核.pdf",
+          "path": "综合/四问数值复核.pdf",
           "preview": {
             "source_sha256": "22fc6f8be42175c155bc03a80cec993a49641160bfd787cf1e6f876507203b08",
             "pages": [
-              "previews/audit/page-1.png",
-              "previews/audit/page-2.png",
-              "previews/audit/page-3.png"
+              "综合/预览/数值复核/page-1.png",
+              "综合/预览/数值复核/page-2.png",
+              "综合/预览/数值复核/page-3.png"
             ]
           }
         },
         {
           "label": "复核脚本",
-          "path": "check_bounds.py"
+          "path": "综合/check_bounds.py"
         },
         {
           "label": "第三问数值实验",
-          "path": "第三问数值实验.md"
+          "path": "第三问/第三问数值实验.md"
         },
         {
           "label": "实验数据",
-          "path": "measurement_results.json"
+          "path": "第三问/measurement_results.json"
         },
         {
           "label": "复现脚本",
-          "path": "measurement_run.py"
+          "path": "第三问/measurement_run.py"
+        },
+        {
+          "label": "第二问 · 双站精度复核",
+          "path": "第二问/双站精度复核.md"
+        },
+        {
+          "label": "第四问 · 七类扰动计分",
+          "path": "第四问/七类扰动计分.md"
         }
       ],
       "blockers": [],
