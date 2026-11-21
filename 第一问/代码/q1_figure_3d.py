@@ -100,6 +100,17 @@ def draw():
             d.line(pts+[pts[0]],fill="#495c68",width=ZOOM)
         label(point((x0+x1)/2,(y0+y1)/2,h),f"B{i}",size=19,bold=True)
         label(point((x0+x1)/2,y0,h*0.55),f"{h} m",size=16,color="white")
+
+    # Anchor the distance annotation inside the purple patch, clear of the T1 marker.
+    px,py=point(TX,TY)
+    accent="#46345c"
+    tip=(px+29*ZOOM,py-6*ZOOM)
+    elbow=(px+58*ZOOM,py-47*ZOOM)
+    line(tip,elbow,accent,2)
+    line(elbow,(elbow[0]+12*ZOOM,elbow[1]),accent,2)
+    label(elbow,"水平距离区间",16,-43,18,accent,True,"lm")
+    label(elbow,"0 ≤ r < r*",16,-18,20,accent,True,"lm")
+    label(elbow,f"r* ≈ {PITCH_RADIUS:.4f} m",16,6,18,accent,False,"lm")
     y=966
     line((65*ZOOM,(y-17)*ZOOM),((WIDTH-65)*ZOOM,(y-17)*ZOOM),"#d6dde0")
     for x,c,s in zip([66,315,643,948,1280],COLORS,
