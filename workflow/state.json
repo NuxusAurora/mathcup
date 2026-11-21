@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "project_title": "2026 数维杯 B题 · 读题与建模",
-  "revision": 4,
-  "updated_at": "2026-11-21T02:16:40+00:00",
+  "revision": 5,
+  "updated_at": "2026-11-21T02:20:40+00:00",
   "nodes": [
     {
       "id": "A",
@@ -76,8 +76,8 @@
       "id": "C",
       "kind": "stage",
       "title": "实现与求解",
-      "status": "running",
-      "summary": "第三问已求解并完成模拟复核。其余题目只有边界检查，尚无完整求解。",
+      "status": "blocked",
+      "summary": "已完成第三问数值解、几何与误差复核及固定计划计分上界。",
       "depends_on": [
         "B"
       ],
@@ -85,6 +85,22 @@
         "B题建模稿.md"
       ],
       "outputs": [
+        {
+          "label": "数值实验与边界复核（3 页）",
+          "path": "四问数值复核.pdf",
+          "preview": {
+            "source_sha256": "22fc6f8be42175c155bc03a80cec993a49641160bfd787cf1e6f876507203b08",
+            "pages": [
+              "previews/audit/page-1.png",
+              "previews/audit/page-2.png",
+              "previews/audit/page-3.png"
+            ]
+          }
+        },
+        {
+          "label": "复核脚本",
+          "path": "check_bounds.py"
+        },
         {
           "label": "第三问数值实验",
           "path": "第三问数值实验.md"
@@ -98,7 +114,9 @@
           "path": "measurement_run.py"
         }
       ],
-      "blockers": [],
+      "blockers": [
+        "全题尚缺针对无人机目标的具体布站与车辆改派方案。"
+      ],
       "checks": [
         {
           "label": "实际运行完成，候选与失败有明确状态",
@@ -116,8 +134,8 @@
       "id": "D",
       "kind": "stage",
       "title": "结果验证",
-      "status": "running",
-      "summary": "第三问已求解并完成模拟复核。其余题目只有边界检查，尚无完整求解。",
+      "status": "blocked",
+      "summary": "已完成第三问数值解、几何与误差复核及固定计划计分上界。",
       "depends_on": [
         "C"
       ],
@@ -125,6 +143,22 @@
         "B题建模稿.md"
       ],
       "outputs": [
+        {
+          "label": "数值实验与边界复核（3 页）",
+          "path": "四问数值复核.pdf",
+          "preview": {
+            "source_sha256": "22fc6f8be42175c155bc03a80cec993a49641160bfd787cf1e6f876507203b08",
+            "pages": [
+              "previews/audit/page-1.png",
+              "previews/audit/page-2.png",
+              "previews/audit/page-3.png"
+            ]
+          }
+        },
+        {
+          "label": "复核脚本",
+          "path": "check_bounds.py"
+        },
         {
           "label": "第三问数值实验",
           "path": "第三问数值实验.md"
@@ -138,7 +172,9 @@
           "path": "measurement_run.py"
         }
       ],
-      "blockers": [],
+      "blockers": [
+        "全题尚缺针对无人机目标的具体布站与车辆改派方案。"
+      ],
       "checks": [
         {
           "label": "正式结果可追溯，结论强度符合证据",
