@@ -11,7 +11,8 @@ from check_bounds import RECTANGLES, RADIUS
 
 TX, TY = 50 + 20 * math.sqrt(3), 70
 HEIGHTS = [20, 28, 12, 24, 32]
-PITCH_RADIUS = 43 / math.tan(math.radians(80))
+PITCH_LIMIT_DEG = 80
+PITCH_RADIUS = 43 / math.tan(math.radians(PITCH_LIMIT_DEG))
 COLORS = ["#85cbb1", "#d2d9df", "#e1ac73", "#b09bd2", "#485663"]
 ROOT = Path(__file__).resolve().parent
 
@@ -133,8 +134,10 @@ def draw(data,area):
         y=412+i*57
         d.rectangle((868,y+3,901,y+30),fill=COLORS[i])
         label(917,y,s,23)
-    label(868,765,"相机高度  2 m",21)
-    label(868,806,"目标高度  45 m",21)
+    d.line((868,712,1240,712),fill="#d6dde0",width=2)
+    label(868,740,f"最优水平距离   {PITCH_RADIUS:.4f} m",25,True)
+    label(868,794,f"对应俯仰角       {PITCH_LIMIT_DEG}°",25,True)
+    label(868,860,"相机高 2 m，目标高 45 m",21)
     canvas.save(ROOT/"T1可观测区域.png")
 
 

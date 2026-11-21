@@ -5,7 +5,7 @@ import math
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-from q1_figure import COLORS, HEIGHTS, RECTANGLES, ROOT, TX, TY, raster
+from q1_figure import COLORS, HEIGHTS, PITCH_LIMIT_DEG, PITCH_RADIUS, RECTANGLES, ROOT, TX, TY, raster
 
 
 WIDTH, HEIGHT = 1540, 1040
@@ -51,6 +51,8 @@ def draw():
 
     text(66,34,"T1 的三维可观测区域",44,bold=True)
     text(69,108,"地面颜色表示车心位于该处时的观测条件，楼体按题设高度绘制。",23)
+    text(965,42,f"最优水平距离   {PITCH_RADIUS:.4f} m",28,bold=True)
+    text(965,92,f"对应俯仰角       {PITCH_LIMIT_DEG}°",26,bold=True)
     corners=[point(0,0),point(100,0),point(100,100),point(0,100)]
     d.line(corners+[corners[0]],fill="#71828a",width=2*ZOOM)
     for i in range(0,101,20):
