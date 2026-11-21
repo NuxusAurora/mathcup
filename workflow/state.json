@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "project_title": "2026 数维杯 B题 · 读题与建模",
-  "revision": 6,
-  "updated_at": "2026-11-21T02:32:24+00:00",
+  "revision": 7,
+  "updated_at": "2026-11-21T02:34:26+00:00",
   "nodes": [
     {
       "id": "A",
@@ -86,6 +86,10 @@
       ],
       "outputs": [
         {
+          "label": "第一问 · T1 三维可观测区域",
+          "path": "T1可观测区域_三维.png"
+        },
+        {
           "label": "第一问 · T1 可观测区域",
           "path": "T1可观测区域.png"
         },
@@ -154,6 +158,10 @@
         "B题建模稿.md"
       ],
       "outputs": [
+        {
+          "label": "第一问 · T1 三维可观测区域",
+          "path": "T1可观测区域_三维.png"
+        },
         {
           "label": "第一问 · T1 可观测区域",
           "path": "T1可观测区域.png"
