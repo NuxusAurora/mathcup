@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "project_title": "2026 数维杯 B题 · 读题与建模",
-  "revision": 3,
-  "updated_at": "2026-11-21T01:49:33+00:00",
+  "revision": 4,
+  "updated_at": "2026-11-21T02:16:40+00:00",
   "nodes": [
     {
       "id": "A",
@@ -76,19 +76,39 @@
       "id": "C",
       "kind": "stage",
       "title": "实现与求解",
-      "status": "pending",
-      "summary": "真实数据处理、代码执行与结构化结果",
+      "status": "running",
+      "summary": "第三问已求解并完成模拟复核。其余题目只有边界检查，尚无完整求解。",
       "depends_on": [
         "B"
       ],
-      "inputs": [],
-      "outputs": [],
+      "inputs": [
+        "B题建模稿.md"
+      ],
+      "outputs": [
+        {
+          "label": "第三问数值实验",
+          "path": "第三问数值实验.md"
+        },
+        {
+          "label": "实验数据",
+          "path": "measurement_results.json"
+        },
+        {
+          "label": "复现脚本",
+          "path": "measurement_run.py"
+        }
+      ],
       "blockers": [],
       "checks": [
         {
           "label": "实际运行完成，候选与失败有明确状态",
           "status": "not_run",
           "detail": ""
+        },
+        {
+          "label": "第三问数值积分与直接随机抽样",
+          "status": "passed",
+          "detail": "100 万样本、两档积分网格；结果见数值实验。"
         }
       ]
     },
@@ -96,19 +116,39 @@
       "id": "D",
       "kind": "stage",
       "title": "结果验证",
-      "status": "pending",
-      "summary": "独立复算、对照、误差与稳健性",
+      "status": "running",
+      "summary": "第三问已求解并完成模拟复核。其余题目只有边界检查，尚无完整求解。",
       "depends_on": [
         "C"
       ],
-      "inputs": [],
-      "outputs": [],
+      "inputs": [
+        "B题建模稿.md"
+      ],
+      "outputs": [
+        {
+          "label": "第三问数值实验",
+          "path": "第三问数值实验.md"
+        },
+        {
+          "label": "实验数据",
+          "path": "measurement_results.json"
+        },
+        {
+          "label": "复现脚本",
+          "path": "measurement_run.py"
+        }
+      ],
       "blockers": [],
       "checks": [
         {
           "label": "正式结果可追溯，结论强度符合证据",
           "status": "not_run",
           "detail": ""
+        },
+        {
+          "label": "第三问数值积分与直接随机抽样",
+          "status": "passed",
+          "detail": "100 万样本、两档积分网格；结果见数值实验。"
         }
       ]
     },
