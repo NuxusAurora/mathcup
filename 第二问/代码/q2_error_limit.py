@@ -1,182 +1,171 @@
-"""Compare complete offline Q2(2) candidate schedules at one or more RMS limits."""
+"""室内地面测点离线模拟：按位置误差门限联合选择测站、测量车和任务顺序。"""
 import argparse
-import csv
 import math
+import sys
 from dataclasses import dataclass
+from functools import lru_cache
 from itertools import combinations, permutations, product
-from pathlib import Path
 
-from q2_schedule import OBSERVE, SPEED, STARTS, TARGETS, TURN
-from q2_schedule_verify import check, read_rows
+import numpy as np
 
 
-STD_RAD = math.radians(1)
-# Elevation <= 80 degrees gives a lower bound on both horizontal ranges.
-ERROR_FLOORS = tuple(STD_RAD * math.sqrt(2) * (h - 2) / math.tan(math.radians(80))
-                     for _, _, h in TARGETS)
-# The comparison manuscript reports constraint levels and rounded times.
-# Individual unrounded errors and complete timelines were not supplied.
-REFERENCE = ((0.5, 35.17), (0.75, 30.31), (1.0, 25.43))
-# Certified lower endpoint for the same scene without the added accuracy constraint.
-UNCONSTRAINED_LOWER_S = 10.352118500
+# Each car stays on its own horizontal rail; distances and times are in m and s.
+RAIL_Y = (0, 4, 9, 13)
+STOPS_X = (2, 9, 16)
+INITIAL_X = (1, 15, 4, 17)
+SPEED = 1  # metres per second
+SETUP = 1
+READING = 4
+# (true x, true y, known six-metre square's lower-left x and y).
+FLOOR_MARKS = ((3.73, 3.31, 0, 0), (9.28, 10.17, 6, 7), (15.46, 5.74, 12, 3))
+TRIALS = 256
+SEED = 20261121
 
 
 @dataclass(frozen=True)
-class Candidate:
-    name: str
-    errors: tuple[float, ...]
-    starts: tuple[float, ...]
-
-    @property
-    def required_limit(self):
-        return max(self.errors)
-
-    @property
-    def latest(self):
-        return max(self.starts)
+class Mode:
+    cars: tuple[int, int]
+    stops: tuple[int, int]
+    rms: float
 
 
-def nonnegative(value):
-    value = float(value)
+@dataclass(frozen=True)
+class Visit:
+    task: int
+    mode: Mode
+    start: float
+
+
+def simulate_modes(mark, rng):
+    """Fit both noisy ranges on the marked floor square; truth is used only to generate/score trials."""
+    x, y, left, bottom = mark
+    axis = np.linspace(0, 6, 61)
+    gx, gy = np.meshgrid(left + axis, bottom + axis)
+    grid = np.column_stack((gx.ravel(), gy.ravel()))
+    truth = np.array([x, y])
+    errors = np.sum((grid - truth) ** 2, axis=1)
+
+    # Use the same observations when a station participates in different pairs.
+    stations = list(product(range(len(RAIL_Y)), STOPS_X))
+    positions = np.array([(stop, RAIL_Y[car]) for car, stop in stations])
+    distances = np.linalg.norm(positions - truth, axis=1)
+    observations = np.maximum(0, rng.normal(distances, 0.20 + 0.035 * distances,
+                                            size=(TRIALS, len(stations))))
+    predicted = np.linalg.norm(positions[:, None, :] - grid, axis=2)
+    pairs = [(a, b) for a, b in combinations(range(len(stations)), 2)
+             if stations[a][0] != stations[b][0]]
+    squared_error = np.zeros(len(pairs))
+    for block in np.array_split(observations, 16):
+        residuals = (predicted[:, None, :] - block.T[:, :, None]) ** 2
+        for k, (a, b) in enumerate(pairs):
+            loss = residuals[a] + residuals[b]
+            # Score mirror-image fits with equal weight; grid ordering must
+            # not decide which side of the baseline receives the estimate.
+            tied = loss <= loss.min(axis=1, keepdims=True) + 1e-12
+            trial_errors = np.sum(tied * errors, axis=1) / tied.sum(axis=1)
+            squared_error[k] += trial_errors.sum()
+
+    modes = []
+    for (a, b), mse_sum in zip(pairs, squared_error):
+        (i, xi), (j, xj) = stations[a], stations[b]
+        modes.append(Mode((i, j), (xi, xj), math.sqrt(mse_sum / TRIALS)))
+    return tuple(modes)
+
+
+@lru_cache(maxsize=1)
+def floor_experiment():
+    rng = np.random.default_rng(SEED)
+    return tuple(simulate_modes(mark, rng) for mark in FLOOR_MARKS)
+
+
+def solve(modes_by_task, limit):
+    """Exhaust the finite model, pruning only when a partial schedule is already slower."""
+    eligible = [[m for m in modes if m.rms <= limit] for modes in modes_by_task]
+    if not all(eligible):
+        return ()
+    best_score = (math.inf, math.inf)
+    best_visits = ()
+    jobs = range(len(eligible))
+
+    def search(order, depth, positions, available, visits, latest, worst_error):
+        nonlocal best_score, best_visits
+        if depth == len(order):
+            if (latest, worst_error) < best_score:
+                best_score = (latest, worst_error)
+                best_visits = tuple(visits)
+            return
+        task = order[depth]
+        for mode in eligible[task]:
+            a, b = mode.cars
+            xa, xb = mode.stops
+            start = max(available[a] + abs(positions[a] - xa) / SPEED,
+                        available[b] + abs(positions[b] - xb) / SPEED) + SETUP
+            next_latest = max(latest, start)
+            error = max(worst_error, mode.rms)
+            if (next_latest, error) >= best_score:
+                continue
+            next_pos, next_free = positions.copy(), available.copy()
+            next_pos[a], next_pos[b] = xa, xb
+            next_free[a] = next_free[b] = start + READING
+            visits.append(Visit(task, mode, start))
+            search(order, depth + 1, next_pos, next_free, visits, next_latest, error)
+            visits.pop()
+
+    for order in permutations(jobs):
+        search(order, 0, list(INITIAL_X), [0] * len(RAIL_Y), [], 0, 0.0)
+    return tuple(sorted(best_visits, key=lambda v: (v.start, v.task)))
+
+
+def parse_limit(raw):
+    value = float(raw)
     if not math.isfinite(value) or value < 0:
-        raise ValueError("请输入有限的非负数")
+        raise ValueError("误差门限必须是有限的非负数")
     return value
 
 
-def archive_candidates():
-    result = []
-    for name, legs in read_rows().items():
-        check(legs)
-        errors, starts = [], []
-        for task, target in enumerate(TARGETS):
-            observations = [leg for leg in legs if leg[1] == task]
-            a, b = [target[:2] - leg[2][-1] for leg in observations]
-            r1, r2 = math.hypot(*a), math.hypot(*b)
-            sine = abs(a[0] * b[1] - a[1] * b[0]) / (r1 * r2)
-            errors.append(STD_RAD * math.hypot(r1, r2) / sine)
-            starts.append(max(leg[3][3] for leg in observations))
-        result.append(Candidate(name, tuple(errors), tuple(starts)))
-    return result
-
-
-def read_scores(path):
-    """Each row is one complete schedule, never three independently selected tasks."""
-    error_fields = [f"T{i}误差_m" for i in (1, 2, 3)]
-    start_fields = [f"T{i}开始_s" for i in (1, 2, 3)]
-    fields = ["方案", *error_fields, *start_fields]
-    result = []
-    with path.open(encoding="utf-8-sig", newline="") as stream:
-        reader = csv.DictReader(stream)
-        if not set(fields) <= set(reader.fieldnames or []):
-            raise ValueError(f"{path} 的 CSV 必须含有列 {','.join(fields)}")
-        for row in reader:
-            try:
-                name = (row["方案"] or "").strip()
-                if not name:
-                    raise ValueError("方案名为空")
-                errors = tuple(nonnegative(row[field]) for field in error_fields)
-                starts = tuple(nonnegative(row[field]) for field in start_fields)
-                if any(err < floor for err, floor in zip(errors, ERROR_FLOORS)):
-                    raise ValueError("目标误差低于俯仰角限制给出的理论下界，请检查单位和原始精度")
-            except (TypeError, ValueError) as exc:
-                raise ValueError(f"{path} 第 {reader.line_num} 行数据无效：{exc}") from exc
-            result.append(Candidate(f"{path.name} / {name}", errors, starts))
-    if not result:
-        raise ValueError(f"{path} 没有方案记录")
-    return result
-
-
-def best_candidate(candidates, limit):
-    return min((c for c in candidates if c.required_limit <= limit),
-               key=lambda c: (c.latest, c.required_limit, c.name), default=None)
-
-
-def time_lower_bound(limit):
-    """Solve a relaxed makespan problem; only its objective bounds the original."""
-    ranges, slews = [], []
-    for _, _, height in TARGETS:
-        # E >= sigma*hypot(r1,r2) and both ranges >= r_min.
-        min_range = (height - 2) / math.tan(math.radians(80))
-        scale = limit / STD_RAD
-        max_range = scale * math.sqrt(1 - (min_range / scale) ** 2)
-        ranges.append(max_range)
-        slews.append(math.degrees(math.atan2(height - 2, max_range)) / TURN)
-
-    jobs = range(len(TARGETS))
-    initial = [[max(0.0, math.dist(p, TARGETS[j, :2]) - ranges[j]) / SPEED + slews[j]
-                for j in jobs] for p in STARTS]
-    transfer = [[max(0.0, math.dist(TARGETS[i, :2], TARGETS[j, :2]) - ranges[i] - ranges[j])
-                 / SPEED + slews[j] for j in jobs] for i in jobs]
-    pairs = list(combinations(range(len(STARTS)), 2))
-    best = math.inf
-    for order in permutations(jobs):
-        for assignment in product(pairs, repeat=len(order)):
-            previous = [None] * len(STARTS)
-            available = [0.0] * len(STARTS)
-            latest = 0.0
-            for job, pair in zip(order, assignment):
-                start = max(initial[car][job] if previous[car] is None else
-                            available[car] + transfer[previous[car]][job] for car in pair)
-                latest = max(start, latest)
-                if latest >= best:
-                    break
-                for car in pair:
-                    available[car] = start + OBSERVE + slews[job]
-                    previous[car] = job
-            else:
-                best = latest
-    return max(best, UNCONSTRAINED_LOWER_S)
-
-
-def report(candidates, limit, reference):
-    print(f"\n误差门限 {limit:g} m（各目标局部水平定位均方根）")
-    if limit < max(ERROR_FLOORS):
-        i = ERROR_FLOORS.index(max(ERROR_FLOORS))
-        print(f"按题设几何，T{i+1} 的误差至少为 {ERROR_FLOORS[i]:.9f} m，该门限不可行。")
+def report(limit):
+    modes = floor_experiment()
+    visits = solve(modes, limit)
+    print(f"\n位置 RMS 门限 {limit:g} m，每个站对用 {TRIALS} 组模拟双车测距评估。")
+    if not visits:
+        print("此模拟的离散站位中没有达标排程。")
+        for i, choices in enumerate(modes, 1):
+            best = min(m.rms for m in choices)
+            if best > limit:
+                print(f"  地面点 P{i} 的最佳站对 RMS 为 {best:.6f} m")
         return
-    print(f"连续模型的最晚开始时刻下界：{time_lower_bound(limit):.9f} s")
-    winner = best_candidate(candidates, limit)
-    if winner:
-        print(f"候选集内最短的最晚观测开始时刻：{winner.latest:.9f} s（{winner.name}）")
-        for task, (err, start) in enumerate(zip(winner.errors, winner.starts), 1):
-            print(f"  T{task}  误差 {err:.8f} m，观测开始 {start:.9f} s")
-    else:
-        print("当前候选集中没有三个目标均达标的方案。")
-
-    if reference:
-        reported = [t for bound, t in REFERENCE if bound <= limit]
-        if reported:
-            print(f"对照稿另报达标方案约 {min(reported):.2f} s（仅汇总数据，未复核）。")
-        else:
-            print("对照稿没有报告此门限下的达标方案。")
+    latest = max(v.start for v in visits)
+    print(f"最短的最晚测量开始时间：{latest:.3f} s；全部测量完成：{latest + READING:.3f} s")
+    for visit in visits:
+        pair = "、".join(f"C{car+1}@({x},{RAIL_Y[car]})"
+                        for car, x in zip(visit.mode.cars, visit.mode.stops))
+        print(f"  P{visit.task+1}  {pair} m  RMS {visit.mode.rms:.6f} m  "
+              f"开始 {visit.start:.3f} s  结束 {visit.start + READING:.3f} s")
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("limits", metavar="误差_m", type=nonnegative, nargs="*",
-                        help="共同误差上限，单位 m。留空可反复输入。")
-    parser.add_argument("--scores", action="append", type=Path, default=[],
-                        help="追加同一题设下的完整方案成绩 CSV，可重复指定。")
-    parser.add_argument("--reference", action="store_true",
-                        help="另列对照稿的取整结果，单独显示。")
-    args = parser.parse_args()
-    try:
-        candidates = archive_candidates()
-        for path in args.scores:
-            candidates.extend(read_scores(path))
-    except (OSError, ValueError, AssertionError) as exc:
-        parser.exit(1, f"读取或复核方案失败：{exc or '时间轴未通过可行性检查'}\n")
-    print(f"已载入 {len(candidates)} 套完整方案。按三个目标共同达标筛选，再比较最晚开始时刻。")
+def main(argv=None):
+    argv = sys.argv[1:] if argv is None else argv
+    if any(a in ("--archive", "--reference", "--scores") or a.startswith("--scores=")
+           for a in argv):
+        from q2_error_archive import main as archive_main
+        return archive_main([a for a in argv if a != "--archive"])
+
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     epilog="--archive 可进入旧的论文时间轴查询模式。")
+    parser.add_argument("limits", type=parse_limit, nargs="*", metavar="门限_m",
+                        help="可指定多个误差门限。省略时进入交互模式。")
+    args = parser.parse_args(argv)
+    print("室内地面测量模拟 | 3 个地面点，4 辆轨道车，每车 3 个停靠站")
     if args.limits:
         for limit in args.limits:
-            report(candidates, limit, args.reference)
+            report(limit)
         return
     while True:
         try:
-            raw = input("\n最大允许误差（m，回车退出）：").strip()
+            raw = input("\n最大允许位置 RMS（m，回车退出）：").strip()
             if not raw or raw.lower() in ("q", "quit", "exit"):
                 return
-            report(candidates, nonnegative(raw), args.reference)
+            report(parse_limit(raw))
         except ValueError as exc:
             print(f"输入无效：{exc}")
         except (EOFError, KeyboardInterrupt):
