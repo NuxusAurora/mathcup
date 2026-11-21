@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "综合"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "综合" / "代码"))
 from check_bounds import RECTANGLES, RADIUS
 
 
@@ -16,7 +16,7 @@ HEIGHTS = [20, 28, 12, 24, 32]
 PITCH_LIMIT_DEG = 80
 PITCH_RADIUS = 43 / math.tan(math.radians(PITCH_LIMIT_DEG))
 COLORS = ["#85cbb1", "#d2d9df", "#e1ac73", "#b09bd2", "#485663"]
-ROOT = Path(__file__).resolve().parent
+IMAGE_DIR = Path(__file__).resolve().parents[1] / "图片"
 
 
 def classify(x, y):
@@ -140,7 +140,7 @@ def draw(data,area):
     label(868,740,f"最优水平距离   {PITCH_RADIUS:.4f} m",25,True)
     label(868,794,f"对应俯仰角       {PITCH_LIMIT_DEG}°",25,True)
     label(868,860,"相机高 2 m，目标高 45 m",21)
-    canvas.save(ROOT/"T1可观测区域.png")
+    canvas.save(IMAGE_DIR/"T1可观测区域.png")
 
 
 if __name__=="__main__":
