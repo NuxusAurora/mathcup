@@ -287,26 +287,32 @@ def refine(roads, plan):
     origin = STARTS[car]
     shadows = shadow_polygons()
 
-    def projected_finish(first_site, second_site):
-        own_ready = np.linalg.norm(first_site - origin) / SPEED + turn_time(first_site, first)
+    def own_ready(first_site):
+        return np.linalg.norm(first_site - origin) / SPEED + turn_time(first_site, first)
+
+    def tail(first_site, second_site):
         drive = np.linalg.norm(second_site - first_site) / SPEED
-        return (max(ready, own_ready) + OBSERVE + turn_time(first_site, first)
-                + drive + turn_time(second_site, second))
+        return OBSERVE + turn_time(first_site, first) + drive + turn_time(second_site, second)
+
+    def projected_finish(first_site, second_site):
+        return max(ready, own_ready(first_site)) + tail(first_site, second_site)
 
     def site_constraints(raw):
-        first_site, second_site = raw.reshape(2, 2)
-        values = []
+        first_site, second_site = raw[:4].reshape(2, 2)
+        start = raw[4]
+        values = [start - ready, start - own_ready(first_site)]
         for station, task in ((first_site, first), (second_site, second)):
             for polygon in shadows[task]:
-                values.append(np.max(polygon[:, :2] @ station + polygon[:, 2]) - 1e-5)
+                values.append(np.max(polygon[:, :2] @ station + polygon[:, 2]) - 1e-7)
             values.append(80 - angles(station, task)[1])
         return values
 
-    trial = minimize(lambda raw: projected_finish(*raw.reshape(2, 2)), np.r_[p, q],
-                     bounds=[(RADIUS, EDGE)] * 4, method="SLSQP",
+    trial = minimize(lambda raw: raw[4] + tail(*raw[:4].reshape(2, 2)),
+                     np.r_[p, q, max(ready, own_ready(p))],
+                     bounds=[(RADIUS, EDGE)] * 4 + [(0, None)], method="SLSQP",
                      constraints={"type": "ineq", "fun": site_constraints},
                      options={"ftol": 1e-12, "maxiter": 500})
-    a, b = trial.x.round(8).reshape(2, 2)
+    a, b = trial.x[:4].round(11).reshape(2, 2)
     if (road(origin, a) and road(a, b) and visible(a, first) and visible(b, second)
             and pair_compatible(a, hp, first) and pair_compatible(b, sp, second)
             and projected_finish(a, b) < projected_finish(p, q)):

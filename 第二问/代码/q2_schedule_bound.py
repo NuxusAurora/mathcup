@@ -6,7 +6,7 @@ from functools import lru_cache
 from itertools import permutations
 
 from q2_schedule import (
-    EDGE, OBSERVE, OMEGA, OUTPUT, RADIUS, SPEED, STARTS, TARGETS, shadow_polygons,
+    EDGE, OBSERVE, OMEGA, OUTPUT, RADIUS, SPEED, STARTS, TARGETS, shadow_polygons, turn_time,
 )
 
 
@@ -80,8 +80,26 @@ def first_ready_lower(origin, task, target, turn_bound):
     return True
 
 
-def certify(target):
+def contained(inner, outer):
+    return (inner[0] >= outer[0] and inner[1] <= outer[1]
+            and inner[2] >= outer[2] and inner[3] <= outer[3])
+
+
+def t1_partner_lower(turn_bound):
+    """Earliest T1 readiness among vehicles other than V3."""
+    helper = float(turn_time(STARTS[4], 0))
+    for car in (0, 1, 3):
+        assert first_ready_lower(STARTS[car], 0, helper, turn_bound)
+    # Any improvement on stationary V5 must lie within this travel radius.
+    radius = math.dist(STARTS[4], TARGETS[0, :2]) - SPEED * helper
+    assert min(radius, TARGETS[0, 2] - 2) > SPEED / OMEGA
+    # Each g component then has a slope < 1/SPEED throughout the ball.
+    return helper
+
+
+def certify(target, local=None):
     turn_bound = make_turn_bound()
+    partner = t1_partner_lower(turn_bound)
     ready_lower = {}
     for car, origin in enumerate(STARTS.tolist()):
         for task in range(3):
@@ -102,6 +120,9 @@ def certify(target):
     for car, origin in enumerate(STARTS.tolist()):
         for first, second in permutations(range(3), 2):
             other = min(ready_lower[k, first] for k in range(5) if k != car)
+            is_critical = (car, first, second) == (2, 0, 2)
+            if is_critical:
+                other = partner
             g_min = turn_bound(domain, first)
             h_min = turn_bound(domain, second)
             travel_budget = SPEED * (target - OBSERVE - 2 * g_min - h_min)
@@ -113,6 +134,9 @@ def certify(target):
             while stack:
                 p, q = stack.pop()
                 count += 1
+                if local is not None and is_critical:
+                    if contained(p, local[0]) and contained(q, local[1]):
+                        continue
                 g, h = turn_bound(p, first), turn_bound(q, second)
                 first_travel = point_distance(origin, p) / SPEED
                 second_travel = box_distance(p, q) / SPEED
@@ -134,7 +158,8 @@ def certify(target):
                     stack.extend((part, q) for part in split(p))
                 else:
                     stack.extend((p, part) for part in split(q))
-    print(f"Continuous lower bound {target:.6f} s, {count} box pairs.")
+    label = "Localized all chains below" if local is not None else "Continuous lower bound"
+    print(f"{label} {target:.9f} s, {count} box pairs.")
     return True
 
 
