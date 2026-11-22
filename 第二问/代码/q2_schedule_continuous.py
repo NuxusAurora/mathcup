@@ -388,14 +388,6 @@ class ContinuousSchedule:
                 return Result([], math.inf, 0, "infeasible")
         self.prepare()
         incumbent, upper, explored = [], math.inf, 0
-        if self.accuracy is not None:
-            seed = self.accuracy.seed()
-            if seed:
-                print(f"Grid seed {objective(seed):.9f} s", flush=True)
-                trial = self.accuracy.refine(seed, self.site_clearance, self.roads, checked_rows)
-                if trial:
-                    incumbent, upper = trial, objective(trial)
-                    print(f"Continuous refinement {upper:.9f} s", flush=True)
         attempts = set()
         serial = count()
         root = Node()
@@ -455,11 +447,11 @@ def main():
         from q2_schedule_accuracy import AccuracyLimit
         accuracy = AccuracyLimit(args.error)
         label = str(args.error).removesuffix(".0")
-        output = OUTPUT / f"第二问第（2）题连续分支定界_{label}m时间轴.csv"
+        output = OUTPUT / f"第二问第（2）题连续分支定界_{label}m新求解时间轴.csv"
         default_nodes = 100_000
         print(f"共同水平定位 RMS 门限 {args.error:g} m", flush=True)
     output = args.output or output
-    protected = (reference,) if accuracy is None else (reference, unconstrained)
+    protected = (reference,) if accuracy is None else (reference, unconstrained, OUTPUT / "第二问第（2）题连续分支定界_1m时间轴.csv")
     if output.resolve() in {path.resolve() for path in protected}:
         parser.error("use a separate path for the new solution")
     result = ContinuousSchedule(accuracy).solve(args.gap, args.nodes or default_nodes)
@@ -477,8 +469,6 @@ def main():
             print(f"  T{task + 1} {cars}：RMS {error:.9f} m，开测 {start:.9f} s")
     path = export({"连续分支定界": result.legs}, output)
     plans = read_rows(path)
-    if accuracy is None:
-        plans.update(read_rows(reference))
     for name, legs in plans.items():
         clearance = check(legs, require_all=False)
         print(f"{name}: {max(times[3] for *_, times in legs):.9f} s; "

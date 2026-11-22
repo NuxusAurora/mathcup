@@ -35,7 +35,7 @@ def nearest_on_segment(start, end, low, high):
     return min(distances)
 
 
-def read_rows(path=OUTPUT / "第二问第（2）题逐车时间轴.csv"):
+def read_rows(path=OUTPUT / "第二问第（2）题连续分支定界时间轴.csv"):
     fields = ["出发_s", "到站_转动开始_s", "指向完成_s", "观测开始_s",
               "观测结束_复位开始_s", "复位完成_s"]
     plans = defaultdict(list)
@@ -166,11 +166,9 @@ def plot(plans):
 
 
 if __name__ == "__main__":
-    plans = read_rows()
-    assert set(plans) == {"优化", "最近指派"}
-    for name, legs in plans.items():
-        road, sight, distance, angles = check(legs)
-        print(f"{name}: road={road:.8f} m, sight={sight:.8f} m, vehicle={distance:.8f} m, "
-              f"intersection degrees={[round(angle, 4) for angle in angles]}")
-    path = plot(plans)
-    print(f"时间轴图片：{path}")
+    for path in (OUTPUT / "第二问第（2）题连续分支定界时间轴.csv",
+                 OUTPUT / "第二问第（2）题连续分支定界_1m时间轴.csv"):
+        for legs in read_rows(path).values():
+            road, sight, distance, angles = check(legs)
+            print(f"{path.name}: road={road:.8f} m, sight={sight:.8f} m, "
+                  f"vehicle={distance:.8f} m")

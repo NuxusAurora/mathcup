@@ -143,7 +143,7 @@ def verify_first_site(q, helper):
 
 def main():
     plans = read_rows()
-    legs = plans["优化"]
+    legs = plans["连续分支定界"]
     upper = max(times[3] for _, _, _, times in legs)
     assert upper < LOCALIZATION_TIME
     assert certify(LOCALIZATION_TIME, (FIRST_BOX, SECOND_BOX))

@@ -5,7 +5,7 @@ from functools import lru_cache
 import numpy as np
 from scipy.optimize import minimize
 
-from q2_error_solve import Instance, local_error
+from q2_error_solve import local_error
 from q2_schedule import EDGE, OBSERVE, RADIUS, SPEED, STARTS, TARGETS, objective, replay, turn_time
 from q2_schedule_bound import point_distance
 
@@ -100,10 +100,6 @@ class AccuracyLimit:
                     and local_error(a, b, TARGETS[task]) <= self.limit):
                 return False
         return True
-
-    def seed(self):
-        # Reuse the ordinary grid search only for an initial feasible upper bound.
-        return Instance(3).solve(self.limit, 15).legs
 
     def refine(self, legs, site_clearance, roads, verify):
         """Move all six stations continuously for this candidate assignment."""

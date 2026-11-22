@@ -1,5 +1,4 @@
 """Vehicle events and replay of the jointly issued question 2 timetable."""
-import csv
 import json
 import math
 import sys
@@ -7,6 +6,7 @@ from dataclasses import dataclass, replace
 from itertools import combinations
 
 from q4_score import DEADLINE, EVENT, ROOT, TIMELINE
+from q4_table5a import read_reference
 
 sys.path.insert(0, str(ROOT / "第二问" / "代码"))
 from q2_schedule import OBSERVE, RADIUS, SPEED, STARTS, TURN
@@ -78,13 +78,11 @@ def read_duties():
     duties = []
     fields = ("出发_s", "到站_转动开始_s", "指向完成_s", "观测开始_s",
               "观测结束_复位开始_s", "复位完成_s")
-    with TIMELINE.open(encoding="utf-8-sig", newline="") as source:
-        for row in csv.DictReader(source):
-            if row["方案"] == "优化":
-                duties.append(Duty(int(row["车辆"][1:]) - 1, row["告警"],
-                                   tuple(map(tuple, json.loads(row["路径坐标_m"]))),
-                                   (float(row["方位角_deg"]), float(row["俯仰角_deg"])),
-                                   *(float(row[field]) for field in fields)))
+    for row in read_reference(TIMELINE):
+        duties.append(Duty(int(row["车辆"][1:]) - 1, row["告警"],
+                           tuple(map(tuple, json.loads(row["路径坐标_m"]))),
+                           (float(row["方位角_deg"]), float(row["俯仰角_deg"])),
+                           *(float(row[field]) for field in fields)))
     return duties
 
 

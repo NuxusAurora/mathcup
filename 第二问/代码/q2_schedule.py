@@ -1,15 +1,13 @@
-"""Solve the three-alert schedule and export both event timelines."""
+"""Shared geometry, route replay and CSV export for continuous schedules."""
 import csv
 import heapq
 import json
 import math
 import sys
 from dataclasses import dataclass
-from itertools import combinations, permutations
 from pathlib import Path
 
 import numpy as np
-from scipy.optimize import minimize
 from scipy.spatial import ConvexHull
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -26,7 +24,6 @@ TARGETS = np.array([
 BUILDINGS = np.column_stack((RECTANGLES, [20, 28, 12, 24, 32]))
 SPEED, TURN, OBSERVE = 3.0, 30.0, 5.0
 EDGE = 100 - RADIUS
-STEP = 0.5
 PAD = RADIUS + 0.001
 OMEGA = math.radians(TURN)
 OUTPUT = ROOT / "第二问" / "文档"
@@ -140,40 +137,11 @@ class Roads:
         return np.array([origin, *reversed(interior), station])
 
 
-def stations(roads):
-    axis = np.arange(RADIUS, EDGE + 1e-8, STEP)
-    grid = np.stack(np.meshgrid(axis, axis), axis=-1).reshape(-1, 2)
-    points = np.unique(np.vstack((grid, STARTS, roads.corners)), axis=0)
-    points = points[road(points, points)]
-    return [points[visible(points, t)] for t in range(3)]
-
-
 def pair_compatible(a, b, task):
     u, v = a - TARGETS[task, :2], b - TARGETS[task, :2]
     return (np.linalg.norm(a - b, axis=-1) >= 2 * RADIUS) & (
         abs(u[..., 0] * v[..., 1] - u[..., 1] * v[..., 0]) > 1e-7
     )
-
-
-def nearest_assignment(roads, candidates):
-    """Greedy alert order, then distance to alert and route length to station."""
-    current = STARTS.copy()
-    plan = []
-    for task, points in enumerate(candidates):
-        target = TARGETS[task, :2]
-        cars = sorted(range(5), key=lambda k: (np.linalg.norm(current[k] - target), k))[:2]
-        selected = []
-        for k in cars:
-            length, _, _ = roads.paths(current[k], points)
-            for index in np.argsort(length, kind="stable"):
-                station = points[index]
-                if not selected or pair_compatible(selected[0][1], station, task):
-                    break
-            assert np.isfinite(length[index])
-            selected.append((k, station))
-            current[k] = station
-        plan.append((task, selected))
-    return plan
 
 
 @dataclass
@@ -213,114 +181,6 @@ def objective(legs):
     return max(leg.start for leg in legs)
 
 
-def joint_search(roads, candidates, initial_limit):
-    ready, best_station, outbound = {}, {}, {}
-    for task, points in enumerate(candidates):
-        for car, origin in enumerate(STARTS):
-            length, _, _ = roads.paths(origin, points)
-            time = length / SPEED + turn_time(points, task)
-            index = np.argmin(time)
-            ready[car, task] = time[index]
-            best_station[car, task] = points[index]
-            outbound[car, task] = time
-
-    # Any solution better than this incumbent must reach both consecutive
-    # sites within SPEED * (limit - OBSERVE) metres of the reused car's origin.
-    start_sites = [np.where(np.any(np.all(points[:, None] == STARTS, axis=2), axis=1))[0]
-                   for points in candidates]
-    limit, winner = initial_limit, None
-    for pass_index in range(2):
-        for car, origin in enumerate(STARTS):
-            others = [k for k in range(5) if k != car]
-            for first, second, third in permutations(range(3)):
-                limit_distance = SPEED * (limit - OBSERVE)
-                p_set = candidates[first]
-                q_set = candidates[second]
-                p_ids = np.flatnonzero(outbound[car, first] + OBSERVE < limit)
-                q_ids = np.flatnonzero(np.linalg.norm(q_set - origin, axis=1) <= limit_distance)
-                if pass_index == 0:
-                    p_ids = np.intersect1d(p_ids, start_sites[first])
-                    q_ids = np.intersect1d(q_ids, start_sites[second])
-                if not len(p_ids) or not len(q_ids):
-                    continue
-                q = q_set[q_ids]
-                q_turn = turn_time(q, second)
-                p = p_set[p_ids]
-                first_ready = outbound[car, first][p_ids]
-                p_turn = turn_time(p, first)
-                # Direct legs attain their Euclidean lower bound. Detours
-                # are unnecessary for the incumbent established below.
-                between = np.linalg.norm(p[:, None] - q, axis=2) / SPEED + q_turn
-                clear = road(p[:, None], q) & (
-                    first_ready + OBSERVE + p_turn < limit
-                )[:, None]
-                between = np.where(clear, between, np.inf)
-                for helper, partner in permutations(others, 2):
-                    remaining = [k for k in others if k not in (helper, partner)]
-                    third_ready = max(ready[k, third] for k in remaining)
-                    if max(third_ready, ready[helper, first] + OBSERVE,
-                           ready[partner, second]) >= limit:
-                        continue
-                    hp, sp = best_station[helper, first], best_station[partner, second]
-                    p_ok = np.array([pair_compatible(point, hp, first) for point in p])
-                    q_ok = np.array([pair_compatible(point, sp, second) for point in q])
-                    if not pair_compatible(*(best_station[k, third] for k in remaining), third):
-                        continue
-                    first_start = np.maximum(first_ready, ready[helper, first])
-                    times = first_start[:, None] + OBSERVE + p_turn[:, None] + between
-                    times = np.maximum(times, max(third_ready, ready[partner, second]))
-                    times = np.where(p_ok[:, None] & q_ok, times, np.inf)
-                    i, j = np.unravel_index(np.argmin(times), times.shape)
-                    if times[i, j] < limit:
-                        limit = times[i, j]
-                        winner = [(first, [(car, p[i]), (helper, hp)]),
-                                  (second, [(car, q[j]), (partner, sp)]),
-                                  (third, [(k, best_station[k, third]) for k in remaining])]
-    assert winner is not None
-    return winner
-
-
-def refine(roads, plan):
-    """Refine both reused-car stations while holding the other four fixed."""
-    (first, [(car, p), (helper, hp)]), (second, [(_, q), (_, sp)]), _ = plan
-    ready = next(leg.ready for leg in replay(roads, plan) if leg.car == helper)
-    origin = STARTS[car]
-    shadows = shadow_polygons()
-
-    def own_ready(first_site):
-        return np.linalg.norm(first_site - origin) / SPEED + turn_time(first_site, first)
-
-    def tail(first_site, second_site):
-        drive = np.linalg.norm(second_site - first_site) / SPEED
-        return OBSERVE + turn_time(first_site, first) + drive + turn_time(second_site, second)
-
-    def projected_finish(first_site, second_site):
-        return max(ready, own_ready(first_site)) + tail(first_site, second_site)
-
-    def site_constraints(raw):
-        first_site, second_site = raw[:4].reshape(2, 2)
-        start = raw[4]
-        values = [start - ready, start - own_ready(first_site)]
-        for station, task in ((first_site, first), (second_site, second)):
-            for polygon in shadows[task]:
-                values.append(np.max(polygon[:, :2] @ station + polygon[:, 2]) - 1e-7)
-            values.append(80 - angles(station, task)[1])
-        return values
-
-    trial = minimize(lambda raw: raw[4] + tail(*raw[:4].reshape(2, 2)),
-                     np.r_[p, q, max(ready, own_ready(p))],
-                     bounds=[(RADIUS, EDGE)] * 4 + [(0, None)], method="SLSQP",
-                     constraints={"type": "ineq", "fun": site_constraints},
-                     options={"ftol": 1e-12, "maxiter": 500})
-    a, b = trial.x[:4].round(11).reshape(2, 2)
-    if (road(origin, a) and road(a, b) and visible(a, first) and visible(b, second)
-            and pair_compatible(a, hp, first) and pair_compatible(b, sp, second)
-            and projected_finish(a, b) < projected_finish(p, q)):
-        plan[0][1][0] = (car, a)
-        plan[1][1][0] = (car, b)
-    return plan
-
-
 def export(solutions, path=OUTPUT / "第二问第（2）题逐车时间轴.csv"):
     rows = []
     for name, legs in solutions.items():
@@ -343,20 +203,3 @@ def export(solutions, path=OUTPUT / "第二问第（2）题逐车时间轴.csv")
         writer.writeheader()
         writer.writerows(rows)
     return path
-
-
-def main():
-    roads = Roads()
-    candidates = stations(roads)
-    baseline = replay(roads, nearest_assignment(roads, candidates))
-    plan = joint_search(roads, candidates, objective(baseline))
-    optimized = replay(roads, refine(roads, plan))
-    solutions = {"优化": optimized, "最近指派": baseline}
-    path = export(solutions)
-    for name, legs in solutions.items():
-        print(name, f"{objective(legs):.9f} s")
-    print(f"逐车时间轴：{path}")
-
-
-if __name__ == "__main__":
-    main()

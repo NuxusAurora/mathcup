@@ -164,9 +164,9 @@ def certify(target, local=None):
 
 
 if __name__ == "__main__":
-    with (OUTPUT / "第二问第（2）题逐车时间轴.csv").open(encoding="utf-8-sig") as stream:
+    with (OUTPUT / "第二问第（2）题连续分支定界时间轴.csv").open(encoding="utf-8-sig") as stream:
         rows = list(csv.DictReader(stream))
-    upper = max(float(row["观测开始_s"]) for row in rows if row["方案"] == "优化")
+    upper = max(float(row["观测开始_s"]) for row in rows if row["方案"] == "连续分支定界")
     gap = float(sys.argv[1]) if len(sys.argv) > 1 else 0.001
     threshold = math.floor((upper - gap) * 1_000_000) / 1_000_000
     if not certify(threshold):

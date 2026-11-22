@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from itertools import combinations, permutations, product
 from pathlib import Path
 
-from q2_schedule import OBSERVE, SPEED, STARTS, TARGETS, TURN
+from q2_schedule import OBSERVE, OUTPUT, SPEED, STARTS, TARGETS, TURN
 from q2_schedule_verify import check, read_rows
 
 
@@ -45,7 +45,7 @@ def nonnegative(value):
 
 def archive_candidates():
     result = []
-    for name, legs in read_rows().items():
+    for name, legs in read_rows(OUTPUT / "第二问第（2）题逐车时间轴.csv").items():
         check(legs)
         errors, starts = [], []
         for task, target in enumerate(TARGETS):

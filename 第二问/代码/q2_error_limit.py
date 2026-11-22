@@ -151,8 +151,8 @@ def main(argv=None):
         return archive_main([a for a in argv if a != "--archive"])
 
     if "--floor" not in argv:
-        from q2_error_solve import main as solve_main
-        return solve_main(argv)
+        if argv not in (["-h"], ["--help"]):
+            raise SystemExit("连续站址求解请使用 q2_schedule_continuous.py --error 门限；室内实验使用 --floor。")
 
     parser = argparse.ArgumentParser(description=__doc__,
                                      epilog="--archive 可进入旧的论文时间轴查询模式。")
