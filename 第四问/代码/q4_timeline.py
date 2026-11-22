@@ -9,15 +9,29 @@ from q4_score import DEADLINE, EVENT, ROOT, TIMELINE
 from q4_table5a import read_reference
 
 sys.path.insert(0, str(ROOT / "第二问" / "代码"))
-from q2_schedule import OBSERVE, RADIUS, SPEED, STARTS, TURN
+from q2_schedule import OBSERVE, RADIUS, SPEED, STARTS, TARGETS, TURN
 
 EAST = (0.0, 0.0)
 TOL = 1e-8
 TASKS = ("T1", "T2", "T3", "T4")
+ORIGINALS = dict(zip(TASKS, map(tuple, TARGETS)))
 SCORES, TRACKS = "重调度逐场景对照.csv", "第四问逐车时间轴.csv"
 DRIVE, AIM, WAIT, OBSERVE_PHASE, RESET, IDLE, RESERVED, FAILED = (
     "行驶", "指向", "等搭档", "联合观测", "复位", "待命", "原表保留时段", "故障退出"
 )
+
+
+def targets_for(location):
+    targets = ORIGINALS.copy()
+    if location is not None:
+        angle, radius = location
+        theta = math.radians(angle)
+        targets["T4"] = (50 + radius * math.cos(theta), 50 + radius * math.sin(theta), 50.0)
+    return targets
+
+
+def num(value):
+    return "" if value is None else f"{value:.12f}".rstrip("0").rstrip(".")
 
 
 @dataclass(frozen=True)

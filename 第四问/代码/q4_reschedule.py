@@ -5,20 +5,18 @@ import hashlib
 from collections import Counter
 from itertools import permutations
 import json
-import math
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from q4_continuous import StationSearch, solve
-from q4_score import DEADLINE, EVENT, read_plan, score
+from q4_score import DEADLINE, EVENT, full_score_lower_bound, read_plan, score_for
 from q4_table5a import ATTACHMENTS, NOMINAL, reference, scenarios
 from q4_timeline import (
-    SCORES, TASKS, TRACKS, first_change, fixed_tracks, observation_starts, read_duties,
+    SCORES, TASKS, TRACKS, first_change, fixed_tracks, num, observation_starts, read_duties,
+    targets_for,
 )
 from q4_verify import check_track, close, difference, read_csv, read_tracks
-from q2_schedule import TARGETS
 
-ORIGINALS = dict(zip(TASKS, map(tuple, TARGETS)))
 CERTIFICATE = ATTACHMENTS / "q4_nominal_certificate.json"
 TRACK_FIELDS = (
     "时间轴ID", "车辆", "阶段", "告警", "开始_s", "结束_s", "起点x_m", "起点y_m",
@@ -32,15 +30,6 @@ SCORE_FIELDS = (
     *(f"{side}{task}开始_s" for side in ("固定", "重调度") for task in TASKS),
     "满分最晚开测下界_s", "时间上下界差_s", "无门限时间轴_SHA256", "连续证书_SHA256",
 )
-
-
-def targets_for(location):
-    targets = ORIGINALS.copy()
-    if location is not None:
-        angle, radius = location
-        theta = math.radians(angle)
-        targets["T4"] = (50 + radius * math.cos(theta), 50 + radius * math.sin(theta), 50.0)
-    return targets
 
 
 def layout_candidates(group, targets, originals):
@@ -61,26 +50,11 @@ def layout_candidates(group, targets, originals):
     return sorted(layouts)
 
 
-def num(value):
-    return "" if value is None else f"{value:.12f}".rstrip("0").rstrip(".")
-
-
 def track_rows(name, tracks):
     for i, track in enumerate(tracks, 1):
         for p in track:
             yield (name, f"V{i}", p.kind, p.task,
                    *(num(value) for value in (p.begin, p.end, *p.p, *p.q, *p.aim0, *p.aim1)))
-
-
-def score_for(starts, targets):
-    return score([starts.get(task) for task in targets])
-
-
-def full_score_lower_bound(fixed_starts, targets, release):
-    # Before communication permits changes, only the original observations can start.
-    locked = [fixed_starts[task] for task in targets
-              if task in fixed_starts and fixed_starts[task] < release]
-    return max(locked) if len(locked) == len(targets) else release
 
 
 def generate(score_writer, track_writer, selected):

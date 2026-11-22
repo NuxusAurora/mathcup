@@ -36,6 +36,17 @@ def score(starts):
     return len(valid), len(starts), last
 
 
+def score_for(starts, targets):
+    return score([starts.get(task) for task in targets])
+
+
+def full_score_lower_bound(fixed_starts, targets, release):
+    # Before communication permits changes, only the original observations can start.
+    locked = [fixed_starts[task] for task in targets
+              if task in fixed_starts and fixed_starts[task] < release]
+    return max(locked) if len(locked) == len(targets) else release
+
+
 def scenarios(plan):
     # A survivor follows the original clock, including reserved waiting time.
     targets = [None, *product(range(0, 360, 45), (30, 40, 50))]

@@ -40,17 +40,25 @@ def nominal_legs(stations):
 
 
 def station_bounds(station, task):
-    direction = TARGETS[task, :2] - station
+    return station_bounds_at(station, TARGETS[task])
+
+
+def station_bounds_at(station, target):
+    direction = np.asarray(target[:2]) - station
     distance = np.linalg.norm(direction)
     azimuth_error = math.asin(OFFSET / distance)
-    pitch = math.atan2(TARGETS[task, 2] - 2, distance - OFFSET)
+    pitch = math.atan2(target[2] - 2, distance - OFFSET)
     yaw = min(math.pi, abs(math.atan2(direction[1], direction[0])) + azimuth_error)
     return math.degrees(pitch), math.degrees(max(pitch, yaw)) / TURN
 
 
 def rms_bound(first, second, task):
     """Bound first-order RMS when the estimator uses nominal station coordinates."""
-    rays = TARGETS[task, :2] - np.array([first, second])
+    return rms_bound_at(first, second, TARGETS[task])
+
+
+def rms_bound_at(first, second, target):
+    rays = np.asarray(target[:2]) - np.array([first, second])
     radii = np.linalg.norm(rays, axis=1)
     cosine = (rays[0] @ rays[1]) / np.prod(radii)
     acute = math.acos(np.clip(abs(cosine), 0, 1))

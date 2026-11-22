@@ -60,11 +60,11 @@ def hit(start, end, rectangle, last=1.0):
     return low <= high
 
 
-def road(start, end):
+def road(start, end, padding=PAD):
     clear = True
     for left, right, bottom, top in RECTANGLES:
         # Open rectangle slightly larger than the exact rounded obstacle.
-        pad = PAD - 1e-7
+        pad = padding - 1e-7
         clear = clear & ~hit(start, end, (left-pad, right+pad, bottom-pad, top+pad))
     return clear
 
@@ -93,22 +93,23 @@ def visible(points, task):
 class Roads:
     """Finite waypoint graph used by both strategies to price and recover paths."""
 
-    def __init__(self):
+    def __init__(self, padding=PAD):
+        self.padding = padding
         self.corners = np.array([
             (x, y) for left, right, bottom, top in RECTANGLES
-            for x in (left - PAD, right + PAD) for y in (bottom - PAD, top + PAD)
+            for x in (left - padding, right + padding) for y in (bottom - padding, top + padding)
         ])
         self.edges = [
             [(j, float(np.linalg.norm(p - q))) for j, q in enumerate(self.corners)
-             if i != j and road(p, q)]
+             if i != j and road(p, q, self.padding)]
             for i, p in enumerate(self.corners)
         ]
 
     def paths(self, origin, points):
-        direct = road(origin, points)
+        direct = road(origin, points, self.padding)
         best = np.where(direct, np.linalg.norm(points - origin, axis=1), np.inf)
         via = np.full(len(points), -1, dtype=int)
-        dist = np.where(road(origin, self.corners),
+        dist = np.where(road(origin, self.corners, self.padding),
                         np.linalg.norm(self.corners - origin, axis=1), np.inf)
         previous = [-1] * len(dist)
         heap = [(d, i) for i, d in enumerate(dist) if np.isfinite(d)]
@@ -123,7 +124,7 @@ class Roads:
                     heapq.heappush(heap, (dist[j], j))
         for i, corner in enumerate(self.corners):
             trial = dist[i] + np.linalg.norm(points - corner, axis=1)
-            better = (trial < best - 1e-10) & road(corner, points)
+            better = (trial < best - 1e-10) & road(corner, points, self.padding)
             best[better], via[better] = trial[better], i
         return best, via, previous
 
