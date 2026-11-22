@@ -321,7 +321,7 @@ def refine(roads, plan):
     return plan
 
 
-def export(solutions):
+def export(solutions, path=OUTPUT / "第二问第（2）题逐车时间轴.csv"):
     rows = []
     for name, legs in solutions.items():
         for leg in sorted(legs, key=lambda leg: (leg.car, leg.depart)):
@@ -336,7 +336,6 @@ def export(solutions):
                 "指向完成_s": f"{leg.ready:.9f}", "观测开始_s": f"{leg.start:.9f}",
                 "观测结束_复位开始_s": f"{leg.end:.9f}", "复位完成_s": f"{leg.reset:.9f}",
             })
-    path = OUTPUT / "第二问第（2）题逐车时间轴.csv"
     with path.open(
         "w", encoding="utf-8-sig", newline=""
     ) as stream:

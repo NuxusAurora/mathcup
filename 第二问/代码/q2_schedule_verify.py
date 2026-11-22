@@ -35,11 +35,11 @@ def nearest_on_segment(start, end, low, high):
     return min(distances)
 
 
-def read_rows():
+def read_rows(path=OUTPUT / "第二问第（2）题逐车时间轴.csv"):
     fields = ["出发_s", "到站_转动开始_s", "指向完成_s", "观测开始_s",
               "观测结束_复位开始_s", "复位完成_s"]
     plans = defaultdict(list)
-    with (OUTPUT / "第二问第（2）题逐车时间轴.csv").open(encoding="utf-8-sig") as stream:
+    with path.open(encoding="utf-8-sig") as stream:
         for row in csv.DictReader(stream):
             car, task = int(row["车辆"][1:]) - 1, int(row["告警"][1:]) - 1
             route = np.array(json.loads(row["路径坐标_m"]))
