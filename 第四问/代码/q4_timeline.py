@@ -74,11 +74,11 @@ class Duty:
         return tuple(phase for phase in phases if phase.end > phase.begin + TOL)
 
 
-def read_duties():
+def read_duties(rows=None):
     duties = []
     fields = ("出发_s", "到站_转动开始_s", "指向完成_s", "观测开始_s",
               "观测结束_复位开始_s", "复位完成_s")
-    for row in read_reference(TIMELINE):
+    for row in read_reference(TIMELINE) if rows is None else rows:
         duties.append(Duty(int(row["车辆"][1:]) - 1, row["告警"],
                            tuple(map(tuple, json.loads(row["路径坐标_m"]))),
                            (float(row["方位角_deg"]), float(row["俯仰角_deg"])),

@@ -43,6 +43,15 @@ def reference(path, mode):
     return duties
 
 
+def scenarios():
+    locations = [None, *product(range(0, 360, 45), (30, 40, 50))]
+    count = 0
+    for location, fault, outage in product(locations, (None, *range(5)), (0, 5, 15, 25)):
+        if location is not None or fault is not None or outage:
+            count += 1
+            yield f"N{count:04d}", location, fault, outage
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, help="逐场输出固定成绩与证书完成数")
@@ -56,22 +65,19 @@ def main():
     for mode in ("nominal", "1m"):
         subprocess.run([sys.executable, "-B", "-X", "utf8", str(ATTACHMENTS / "verify_q4.py"),
                         str(ATTACHMENTS / f"q4_{mode}_certificate.json")], check=True)
-    locations = [None, *product(range(0, 360, 45), (30, 40, 50))]
-    faults = [None, *(f"V{i}" for i in range(1, 6))]
     groups = defaultdict(Counter)
     results = []
     digest = hashlib.sha256(NOMINAL.read_bytes()).hexdigest()
     latest = max(float(row["观测开始_s"]) for row in duties)
-    for location, fault, outage in product(locations, faults, (0, 5, 15, 25)):
+    for scene, location, fault, outage in scenarios():
         flags = (location is not None, fault is not None, outage > 0)
-        if not any(flags):
-            continue
+        car = "" if fault is None else f"V{fault + 1}"
         lost = {r["告警"] for r in duties
-                if r["车辆"] == fault and float(r["观测开始_s"]) >= 5}
+                if r["车辆"] == car and float(r["观测开始_s"]) >= 5}
         missing = len(lost) + int(location is not None)
         groups[flags][missing] += 1
         n = 3 + int(location is not None)
-        results.append((f"N{len(results)+1:04d}", *(location or ("", "")), fault or "",
+        results.append((scene, *(location or ("", "")), car,
                         outage, n, n - missing, 60 if missing else latest, n,
                         "证书保证满分" if missing else "沿用原表", digest))
     counts = sum(groups.values(), Counter())
