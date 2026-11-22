@@ -177,7 +177,7 @@ class ContinuousSchedule:
         self.turn_bound = make_turn_bound()
         self.stations = {}
         self.ready = {}
-        self.partner = {}
+        self.partner_lower = {}
         self.task_floor = 0.0
         self.minorants = {}
 
@@ -258,8 +258,8 @@ class ContinuousSchedule:
                 self.ready[car, task] = ready
                 solo[car, task] = self.solo_bound(STARTS[car], task, site, ready)
         self.task_floor = float(np.sort(solo, axis=0)[1].max())
-        self.partner = {(car, task): min(solo[k, task] for k in CARS if k != car)
-                        for car in CARS for task in TASKS}
+        self.partner_lower = {(car, task): min(solo[k, task] for k in CARS if k != car)
+                              for car in CARS for task in TASKS}
 
     def lower(self, node):
         first, second = node.first, node.second
@@ -272,7 +272,7 @@ class ContinuousSchedule:
         p, q = node.p, node.q
         g = min(self.turn_bound(p, i) for i in first)
         h = min(self.turn_bound(q, j) for j in second)
-        partner = min(self.partner[k, i] for k in node.cars for i in first)
+        partner = min(self.partner_lower[k, i] for k in node.cars for i in first)
         initial = min(point_distance(STARTS[k], p) for k in node.cars) / SPEED
         total_drive = min(point_distance(STARTS[k], q) for k in node.cars) / SPEED
         tail = box_distance(p, q) / SPEED + h
@@ -289,10 +289,9 @@ class ContinuousSchedule:
                 chain = max(chain, local.lower(p, q))
         return max(self.task_floor, chain) - BOUND_MARGIN
 
-    def refined_sites(self, chain, p, q):
+    def refined_sites(self, chain, p, q, partner_ready):
         car, first, second = chain
         origin = STARTS[car]
-        helper = self.partner[car, first]
 
         def tail(a, b):
             return OBSERVE + float(turn_time(a, first)) + direct_ready(a, b, second)
@@ -305,8 +304,8 @@ class ContinuousSchedule:
 
         trial = minimize(
             lambda raw: raw[4] + tail(*raw[:4].reshape(2, 2)),
-            np.r_[p, q, max(helper, direct_ready(origin, p, first))],
-            bounds=bounds(FIELD) * 2 + [(helper, None)],
+            np.r_[p, q, max(partner_ready, direct_ready(origin, p, first))],
+            bounds=bounds(FIELD) * 2 + [(partner_ready, None)],
             constraints={"type": "ineq", "fun": constraints}, method="SLSQP",
             options={"ftol": 1e-12, "maxiter": 150},
         )
@@ -345,6 +344,33 @@ class ContinuousSchedule:
             return legs
         return None
 
+    def candidate(self, chain, p, q):
+        car, first, second = chain
+        # Use an attainable readiness to seed the matching. The matched
+        # teammate's replayed readiness governs the final station refinement.
+        seed_ready = min(self.ready[k, first] for k in CARS if k != car)
+        if not math.isfinite(seed_ready):
+            return None
+        legs = self.complete(chain, *self.refined_sites(chain, p, q, seed_ready))
+        if legs is None:
+            return None
+
+        own_sites = {leg.task: leg.route[-1] for leg in legs if leg.car == car}
+        partner = next(leg for leg in legs if leg.task == first and leg.car != car)
+        sites = dict(zip((first, second), self.refined_sites(
+            chain, own_sites[first], own_sites[second], partner.ready
+        )))
+        teams = {}
+        for leg in legs:
+            station = sites[leg.task] if leg.car == car else leg.route[-1]
+            teams.setdefault(leg.task, []).append((leg.car, station))
+        refined = replay(self.roads, list(teams.items()))
+        try:
+            checked_rows(refined)
+        except AssertionError:
+            return legs
+        return min((legs, refined), key=objective)
+
     def solve(self, gap, max_nodes):
         self.prepare()
         incumbent, upper, explored = [], math.inf, 0
@@ -362,12 +388,12 @@ class ContinuousSchedule:
                 key = chain, scale
                 if key not in attempts:
                     attempts.add(key)
-                    sites = self.refined_sites(chain, center(node.p), center(node.q))
-                    trial = self.complete(chain, *sites)
+                    trial = self.candidate(chain, center(node.p), center(node.q))
                     if trial and objective(trial) < upper:
                         incumbent, upper = trial, objective(trial)
+                        sites = [leg.route[-1] for leg in trial if leg.car == chain[0]]
                         self.minorants[chain] = ChainMinorant(
-                            chain, self.partner[chain[:2]], *sites, self.shadows
+                            chain, self.partner_lower[chain[:2]], *sites, self.shadows
                         )
                         print(f"Incumbent {upper:.9f} s at node {explored}, "
                               f"V{chain[0] + 1}: T{chain[1] + 1} -> T{chain[2] + 1}",
