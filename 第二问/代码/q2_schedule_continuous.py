@@ -171,10 +171,11 @@ class Result:
 
 
 class ContinuousSchedule:
-    def __init__(self):
+    def __init__(self, accuracy=None):
         self.roads = Roads()
         self.shadows = shadow_polygons()
         self.turn_bound = make_turn_bound()
+        self.accuracy = accuracy
         self.stations = {}
         self.ready = {}
         self.partner_lower = {}
@@ -260,6 +261,8 @@ class ContinuousSchedule:
         self.task_floor = float(np.sort(solo, axis=0)[1].max())
         self.partner_lower = {(car, task): min(solo[k, task] for k in CARS if k != car)
                               for car in CARS for task in TASKS}
+        if self.accuracy is not None:
+            self.task_floor = max(self.task_floor, self.accuracy.task_floor)
 
     def lower(self, node):
         first, second = node.first, node.second
@@ -281,8 +284,15 @@ class ContinuousSchedule:
                for j in second):
             # Over this rectangle motion cannot reduce dwell plus slew time.
             tail = max(tail, min(self.turn_bound(p, j, False) for j in second))
-        chain = OBSERVE + max(max(partner, initial + g) + g + tail,
-                              total_drive + 2 * g + h)
+        synced = max(partner, initial + g)
+        second_ready = 0.0
+        fixed = node.chain()
+        if self.accuracy is not None and fixed is not None:
+            car, i, j = fixed
+            synced = max(synced, self.accuracy.pair_floor(car, i, p))
+            second_ready = self.accuracy.pair_floor(car, j, q)
+        chain = max(second_ready, OBSERVE + max(synced + g + tail,
+                                                total_drive + 2 * g + h))
         if max(width(p), width(q)) <= 3.1:
             local = self.minorants.get(node.chain())
             if local is not None:
@@ -372,8 +382,20 @@ class ContinuousSchedule:
         return min((legs, refined), key=objective)
 
     def solve(self, gap, max_nodes):
+        if self.accuracy is not None:
+            self.accuracy.prepare(self.turn_bound)
+            if not math.isfinite(self.accuracy.task_floor):
+                return Result([], math.inf, 0, "infeasible")
         self.prepare()
         incumbent, upper, explored = [], math.inf, 0
+        if self.accuracy is not None:
+            seed = self.accuracy.seed()
+            if seed:
+                print(f"Grid seed {objective(seed):.9f} s", flush=True)
+                trial = self.accuracy.refine(seed, self.site_clearance, self.roads, checked_rows)
+                if trial:
+                    incumbent, upper = trial, objective(trial)
+                    print(f"Continuous refinement {upper:.9f} s", flush=True)
         attempts = set()
         serial = count()
         root = Node()
@@ -385,10 +407,13 @@ class ContinuousSchedule:
             if chain is not None:
                 # Try local continuous optimization once at each spatial scale.
                 scale = int(math.floor(math.log2(max(width(node.p), width(node.q)))))
-                key = chain, scale
+                key = (chain, scale) if self.accuracy is None else chain
                 if key not in attempts:
                     attempts.add(key)
                     trial = self.candidate(chain, center(node.p), center(node.q))
+                    if trial and self.accuracy is not None:
+                        trial = self.accuracy.refine(trial, self.site_clearance,
+                                                     self.roads, checked_rows)
                     if trial and objective(trial) < upper:
                         incumbent, upper = trial, objective(trial)
                         sites = [leg.route[-1] for leg in trial if leg.car == chain[0]]
@@ -413,23 +438,48 @@ class ContinuousSchedule:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--gap", type=float, default=2e-7, help="absolute gap in seconds")
-    parser.add_argument("--nodes", type=int, default=500_000, help="node limit")
-    parser.add_argument("--output", type=Path,
-                        default=OUTPUT / "第二问第（2）题连续分支定界时间轴.csv")
+    parser.add_argument("--nodes", type=int,
+                        help="node limit, default 500000 without or 100000 with an error limit")
+    parser.add_argument("--error", type=float, metavar="RMS_M",
+                        help="maximum horizontal localization RMS in metres for every alert")
+    parser.add_argument("--output", type=Path, help="timeline CSV path")
     args = parser.parse_args()
-    if not math.isfinite(args.gap) or args.gap <= 0 or args.nodes < 1:
+    if not math.isfinite(args.gap) or args.gap <= 0 or (args.nodes is not None and args.nodes < 1):
         parser.error("gap and node limit must be positive")
     reference = OUTPUT / "第二问第（2）题逐车时间轴.csv"
-    if args.output.resolve() == reference.resolve():
+    unconstrained = OUTPUT / "第二问第（2）题连续分支定界时间轴.csv"
+    accuracy, output, default_nodes = None, unconstrained, 500_000
+    if args.error is not None:
+        if not math.isfinite(args.error) or args.error < 0:
+            parser.error("error limit must be a finite nonnegative number")
+        from q2_schedule_accuracy import AccuracyLimit
+        accuracy = AccuracyLimit(args.error)
+        label = str(args.error).removesuffix(".0")
+        output = OUTPUT / f"第二问第（2）题连续分支定界_{label}m时间轴.csv"
+        default_nodes = 100_000
+        print(f"共同水平定位 RMS 门限 {args.error:g} m", flush=True)
+    output = args.output or output
+    protected = (reference,) if accuracy is None else (reference, unconstrained)
+    if output.resolve() in {path.resolve() for path in protected}:
         parser.error("use a separate path for the new solution")
-    result = ContinuousSchedule().solve(args.gap, args.nodes)
+    result = ContinuousSchedule(accuracy).solve(args.gap, args.nodes or default_nodes)
     print(f"Status {result.status}; lower bound {result.lower:.12f} s; nodes {result.nodes}")
     if not result.legs:
-        raise SystemExit("No verified incumbent found")
+        raise SystemExit("误差门限下无可行解" if result.status == "infeasible"
+                         else "搜索预算内未找到已核验的可行方案")
     upper = objective(result.legs)
     print(f"Upper bound {upper:.12f} s; gap {upper - result.lower:.12g} s")
-    path = export({"连续分支定界": result.legs}, args.output)
-    for name, legs in {**read_rows(path), **read_rows(reference)}.items():
+    if accuracy is not None:
+        print(f"最晚观测开始 {upper:.9f} s，全部观测结束 {max(leg.end for leg in result.legs):.9f} s。")
+        for task, error in enumerate(accuracy.errors(result.legs)):
+            cars = "、".join(f"V{leg.car + 1}" for leg in result.legs if leg.task == task)
+            start = next(leg.start for leg in result.legs if leg.task == task)
+            print(f"  T{task + 1} {cars}：RMS {error:.9f} m，开测 {start:.9f} s")
+    path = export({"连续分支定界": result.legs}, output)
+    plans = read_rows(path)
+    if accuracy is None:
+        plans.update(read_rows(reference))
+    for name, legs in plans.items():
         clearance = check(legs, require_all=False)
         print(f"{name}: {max(times[3] for *_, times in legs):.9f} s; "
               f"clearances {clearance[:3]}; angles {clearance[3]}")
